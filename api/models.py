@@ -57,11 +57,13 @@ class Profile(models.Model):
     settings.AUTH_USER_MODEL, related_name='target_user',
     on_delete=models.CASCADE
   )
+  telephone_number = models.CharField(max_length=12, unique=True, blank=True)
   profile_name = models.CharField(max_length=100)
   profile_text = models.CharField(max_length=1000)
   is_college_student = models.BooleanField(default=False)
   created_at = models.DateTimeField(auto_now_add=True)
   profile_image = models.ImageField(blank=True, null=True, upload_to=upload_avatar_path)
+  following_users = models.ManyToManyField(User, related_name='following_users',  blank=True)
 
   def __str__(self):
     return self.profile_name
@@ -81,6 +83,18 @@ class Post(models.Model):
 
   def __str__(self):
     return self.title
+
+
+class Reviews(models.Model):
+  target_post = models.ForeignKey(
+    Post, related_name='target_post',
+    on_delete=models.CASCADE
+  )
+  review_text = models.CharField(max_length=1000)
+  stars = models.PositiveSmallIntegerField()
+
+  def __str__(self):
+    return self.target_post.Post.title + self.review_text
 
 
 class Message(models.Model):

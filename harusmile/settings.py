@@ -92,7 +92,8 @@ DATABASES = {
         'NAME': config('DB_NAME'),
         'USER': config('DB_USER'),
         'HOST': config('DB_HOST'),
-        'PORT': 5432
+        'PORT': 5432,
+        'ATOMIC_REQUESTS': True,
     }
 }
 

@@ -85,7 +85,7 @@ class Post(models.Model):
     return self.title
 
 
-class Reviews(models.Model):
+class Review(models.Model):
   target_post = models.ForeignKey(
     Post, related_name='target_post',
     on_delete=models.CASCADE

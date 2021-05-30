@@ -7,60 +7,43 @@ from django.conf import settings
 
 
 def upload_avatar_path(instance, filename):
-    ext = filename.split('.')[-1]
-    return '/'.join(['avatars', str(instance.target_user.id)+str(instance.profile_name)+str(".")+str(ext)])
+  ext = filename.split('.')[-1]
+  return '/'.join(['avatars', str(instance.target_user.id)+str(instance.profile_name)+str(".")+str(ext)])
 
 
 def upload_post_path(instance, filename):
-    ext = filename.split('.')[-1]
-    return '/'.join(['todos', str(instance.posted_user.id)+str(instance.title)+str(".")+str(ext)])
-
-
-ADDRESS = (
-  ('Hokkaido', '北海道'),
-  ('Tokyo', '東京都'),
-  ('Chiba', '千葉県'),
-)
-
-GENDER = (
-  ('Male', '男性'),
-  ('Female', '女性'),
-  ('Others', 'その他'),
-)
+  ext = filename.split('.')[-1]
+  return '/'.join(['todos', str(instance.posted_user.id)+str(instance.title)+str(".")+str(ext)])
 
 
 class UserManager(BaseUserManager):
-    def create_user(self, email, password=None):
-        if not email:
-            raise ValueError('email is must')
+  def create_user(self, email, password=None):
+    if not email:
+      raise ValueError('email is must')
 
-        user = self.model(email=self.normalize_email(email))
-        user.set_password(password)
-        user.save(using=self._db)
-        return user
+    user = self.model(email=self.normalize_email(email))
+    user.set_password(password)
+    user.save(using=self._db)
+    return user
 
-    def create_superuser(self, email, password):
-        user = self.create_user(email, password)
-        user.is_staff = True
-        user.is_superuser = True
-        user.save(using=self._db)
-
-        return user
+  def create_superuser(self, email, password):
+    user = self.create_user(email, password)
+    user.is_staff = True
+    user.is_superuser = True
+    user.save(using=self._db)
+    return user
 
 
 class User(AbstractBaseUser, PermissionsMixin):
-    email = models.EmailField(max_length=50, unique=True)
-    is_active = models.BooleanField(default=True)
-    is_staff = models.BooleanField(default=False)
-    first_name = models.CharField(max_length=50, blank=True, null=True)
-    last_name = models.CharField(max_length=50, blank=True, null=True)
-
-    objects = UserManager()
-
-    USERNAME_FIELD = 'email'
-
-    def __str__(self):
-        return self.email
+  email = models.EmailField(max_length=50, unique=True)
+  is_active = models.BooleanField(default=True)
+  is_staff = models.BooleanField(default=False)
+  first_name = models.CharField(max_length=50, blank=True, null=True)
+  last_name = models.CharField(max_length=50, blank=True, null=True)
+  objects = UserManager()
+  USERNAME_FIELD = 'email'
+  def __str__(self):
+    return self.email
 
 
 
@@ -71,13 +54,24 @@ class Tag(models.Model):
     return self.tag_name
 
 
+class Gender(models.Model):
+  gender_name = models.CharField(max_length=100, unique=True)
+
+  def __str__(self):
+    return self.gender_name
+
+
+class Address(models.Model):
+  address_name = models.CharField(max_length=200, unique=True)
+
+  def __str__(self):
+    return self.address_name
 
 class Profile(models.Model):
   target_user = models.OneToOneField(
     settings.AUTH_USER_MODEL, related_name='target_user',
     on_delete=models.CASCADE
   )
-  gender = models.CharField(max_length=20, choices=GENDER, default='')
   telephone_number = models.CharField(max_length=12, unique=True, blank=True)
   profile_name = models.CharField(max_length=100, default='')
   profile_text = models.CharField(max_length=1000, default='', blank=True)
@@ -86,7 +80,14 @@ class Profile(models.Model):
   created_at = models.DateTimeField(auto_now_add=True)
   profile_image = models.ImageField(blank=True, null=True, upload_to=upload_avatar_path)
   following_users = models.ManyToManyField(User, related_name='following_users',  blank=True)
-  address = models.CharField(choices=ADDRESS, max_length=50)
+  selected_address = models.ForeignKey(
+    Address, related_name='selected_address',
+    on_delete=models.PROTECT, blank=True
+  )
+  selected_gender = models.ForeignKey(
+    Gender, related_name='selected_gender',
+    on_delete=models.PROTECT, blank=True
+  )
   tags = models.ManyToManyField(Tag, related_name='tags', blank=True)
 
   def __str__(self):
@@ -112,6 +113,10 @@ class Post(models.Model):
 class Review(models.Model):
   target_post = models.ForeignKey(
     Post, related_name='target_post',
+    on_delete=models.CASCADE
+  )
+  reviewed_user = models.ForeignKey(
+    User, related_name='reviewed_user',
     on_delete=models.CASCADE
   )
   review_text = models.CharField(max_length=1000)

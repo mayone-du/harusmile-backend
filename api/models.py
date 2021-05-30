@@ -16,6 +16,18 @@ def upload_post_path(instance, filename):
     return '/'.join(['todos', str(instance.posted_user.id)+str(instance.title)+str(".")+str(ext)])
 
 
+ADDRESS = (
+  ('Hokkaido', '北海道'),
+  ('Tokyo', '東京都'),
+  ('Chiba', '千葉県'),
+)
+
+GENDER = (
+  ('Male', '男性'),
+  ('Female', '女性'),
+  ('Others', 'その他'),
+)
+
 
 class UserManager(BaseUserManager):
     def create_user(self, email, password=None):
@@ -52,18 +64,30 @@ class User(AbstractBaseUser, PermissionsMixin):
 
 
 
+class Tag(models.Model):
+  tag_name = models.CharField(max_length=100, unique=True)
+
+  def __str__(self):
+    return self.tag_name
+
+
+
 class Profile(models.Model):
   target_user = models.OneToOneField(
     settings.AUTH_USER_MODEL, related_name='target_user',
     on_delete=models.CASCADE
   )
+  gender = models.CharField(max_length=20, choices=GENDER, default='')
   telephone_number = models.CharField(max_length=12, unique=True, blank=True)
-  profile_name = models.CharField(max_length=100)
-  profile_text = models.CharField(max_length=1000)
+  profile_name = models.CharField(max_length=100, default='')
+  profile_text = models.CharField(max_length=1000, default='', blank=True)
   is_college_student = models.BooleanField(default=False)
+  school_name = models.CharField(max_length=100, default='')
   created_at = models.DateTimeField(auto_now_add=True)
   profile_image = models.ImageField(blank=True, null=True, upload_to=upload_avatar_path)
   following_users = models.ManyToManyField(User, related_name='following_users',  blank=True)
+  address = models.CharField(choices=ADDRESS, max_length=50)
+  tags = models.ManyToManyField(Tag, related_name='tags', blank=True)
 
   def __str__(self):
     return self.profile_name
@@ -94,7 +118,7 @@ class Review(models.Model):
   stars = models.PositiveSmallIntegerField()
 
   def __str__(self):
-    return self.target_post.Post.title + self.review_text
+    return self.target_post.title + ' <- ' + '"' + self.review_text + '"'
 
 
 class Message(models.Model):

@@ -12,6 +12,7 @@ RUN \
   django-cors-headers \
   django-filter \
   django-graphql-jwt \
+  pyjwt==1.7.0 \
   python-decouple \
   psycopg2-binary \
   gunicorn

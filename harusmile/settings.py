@@ -105,7 +105,7 @@ DATABASES = {
     }
 }
 
-GRAPHENE = {'SCHEMA': 'prj.schema.schema',
+GRAPHENE = {'SCHEMA': 'harusmile.schema.schema',
             'MIDDLEWARE': [
                 'graphql_jwt.middleware.JSONWebTokenMiddleware',
             ],

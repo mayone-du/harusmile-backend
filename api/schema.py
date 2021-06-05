@@ -199,6 +199,7 @@ class CreatePostMutation(relay.ClientIDMutation):
       post_image = input.get('post_image'),
       is_published = input.get('is_published'),
     )
+    post.save()
 
     return CreatePostMutation(post=post)
 
@@ -222,6 +223,7 @@ class UpdatePostMutation(relay.ClientIDMutation):
       post_image = input.get('post_image'),
       is_published = input.get('is_published'),
     )
+    post.save()
     return UpdatePostMutation(post=post)
 
 
@@ -255,6 +257,7 @@ class CreateMessageMutation(relay.ClientIDMutation):
       sender_user_id=info.context.user.id,
       distination = User.objects.get(from_global_id(input.get('distination'))[1])
     )
+    message.save()
     return CreateMessageMutation(message=message)
   
 
@@ -274,7 +277,7 @@ class CreateReviewMutation(relay.ClientIDMutation):
       review_text = input.get('review_text'),
       stars = input.get('stars'),
     )
-    
+    review.save()
     return CreateReviewMutation(review=review)
 
 
@@ -293,6 +296,7 @@ class Mutation(graphene.ObjectType):
 
 
 class Query(graphene.ObjectType):
+  login_user = graphene.Field(UserNode)
   user = graphene.Field(UserNode, id=graphene.NonNull(graphene.ID))
   all_users = DjangoFilterConnectionField(UserNode)
   profile = graphene.Field(ProfileNode, id=graphene.NonNull(graphene.ID))
@@ -310,6 +314,12 @@ class Query(graphene.ObjectType):
 
   
 
+  # login_user
+  @login_required
+  def resolve_login_user(self, info, **kwargs):
+    return User.objects.get(id=info.context.user.id)
+
+
   # user
   @login_required
   def resolve_user(self, info, **kwargs):
@@ -320,7 +330,7 @@ class Query(graphene.ObjectType):
   def resolve_all_users(self, info, **kwargs):
     return get_user_model().objects.all()
 
-  # profile
+  # profil
   @login_required
   def resolve_profile(self, info, **kwargs):
     id = kwargs.get('id')
@@ -332,13 +342,11 @@ class Query(graphene.ObjectType):
     return Profile.objects.all()
 
   # post
-  @login_required
   def resolve_post(self, info, **kwargs):
     id = kwargs.get('id')
     if id is not None:
       return Post.objects.get(id=from_global_id(id)[1])
 
-  @login_required
   def resolve_all_posts(self, info, **kwargs):
     return Post.objects.all()
 

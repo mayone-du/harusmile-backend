@@ -128,7 +128,7 @@ class Review(models.Model):
   stars = models.PositiveSmallIntegerField()
 
   def __str__(self):
-    return self.target_post.title + ' <- ' + '"' + self.review_text + '"'
+    return self.provider.email + ' <- ' + '"' + self.review_text + '"' + ' :from: ' + self.customer.email
 
 
 class Message(models.Model):

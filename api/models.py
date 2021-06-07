@@ -79,6 +79,7 @@ class Profile(models.Model):
   school_name = models.CharField(max_length=100, default='')
   created_at = models.DateTimeField(auto_now_add=True)
   profile_image = models.ImageField(blank=True, null=True, upload_to=upload_avatar_path)
+  age = models.PositiveSmallIntegerField(default=0)
   following_users = models.ManyToManyField(User, related_name='following_users',  blank=True)
   selected_address = models.ForeignKey(
     Address, related_name='selected_address',
@@ -111,12 +112,16 @@ class Post(models.Model):
 
 
 class Review(models.Model):
-  target_post = models.ForeignKey(
-    Post, related_name='target_post',
+  # target_post = models.ForeignKey(
+  #   Post, related_name='target_post',
+  #   on_delete=models.CASCADE
+  # )
+  provider = models.ForeignKey(
+    settings.AUTH_USER_MODEL, related_name='provider',
     on_delete=models.CASCADE
   )
-  reviewed_user = models.ForeignKey(
-    User, related_name='reviewed_user',
+  customer = models.ForeignKey(
+    settings.AUTH_USER_MODEL, related_name='customer',
     on_delete=models.CASCADE
   )
   review_text = models.CharField(max_length=1000)

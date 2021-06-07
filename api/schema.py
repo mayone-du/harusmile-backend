@@ -141,6 +141,7 @@ class UpdateProfileMutation(relay.ClientIDMutation):
     profile_name = graphene.String(required=True)
     is_college_student = graphene.Boolean(required=True)
     school_name = graphene.String(required=True)
+    age = graphene.Int(required=True)
     selected_gender = graphene.ID(required=True)
     selected_address = graphene.ID(required=True)
     following_users = graphene.List(graphene.ID)
@@ -155,6 +156,7 @@ class UpdateProfileMutation(relay.ClientIDMutation):
       profile_name = input.get('profile_name'),
       is_college_student = input.get('is_college_student'),
       school_name = input.get('school_name'),
+      age = input.get('age'),
       gender = input.get('gender'),
       tags = input.get('tags'),
     )
@@ -263,7 +265,8 @@ class CreateMessageMutation(relay.ClientIDMutation):
 
 class CreateReviewMutation(relay.ClientIDMutation):
   class Input:
-    target_post = graphene.ID(required=True)
+    # target_post = graphene.ID(required=True)
+    provider = graphene.ID(required=True)
     review_text = graphene.String(required=True)
     stars = graphene.Int(required=True)
 
@@ -272,7 +275,7 @@ class CreateReviewMutation(relay.ClientIDMutation):
   @login_required
   def mutate_and_get_payload(root, info, **input):
     review = Review(
-      target_post = from_global_id(input.get('target_post'))[1],
+      provider = from_global_id(input.get('provider'))[1],
       reviewed_user_id = info.context.user.id,
       review_text = input.get('review_text'),
       stars = input.get('stars'),
@@ -291,6 +294,7 @@ class Mutation(graphene.ObjectType):
   update_post = UpdatePostMutation.Field()
   delete_post = DeletePostMutation.Field()
   create_message = CreateMessageMutation.Field()
+  create_review = CreateReviewMutation.Field()
   token_auth = graphql_jwt.ObtainJSONWebToken.Field()
   refresh_token = graphql_jwt.Refresh.Field()
 

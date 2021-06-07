@@ -330,14 +330,12 @@ class Query(graphene.ObjectType):
   def resolve_all_users(self, info, **kwargs):
     return get_user_model().objects.all()
 
-  # profil
-  @login_required
+  # profile
   def resolve_profile(self, info, **kwargs):
     id = kwargs.get('id')
     if id is not None:
       return Profile.objects.get(id=from_global_id(id)[1])
 
-  @login_required
   def resolve_all_profiles(self, info, **kwargs):
     return Profile.objects.all()
 

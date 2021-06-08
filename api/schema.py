@@ -146,6 +146,12 @@ class UpdateProfileMutation(relay.ClientIDMutation):
     selected_address = graphene.ID(required=True)
     following_users = graphene.List(graphene.ID)
     tags = graphene.List(graphene.ID)
+    undergraduate = graphene.String(required=True)
+    department = graphene.String(required=True)
+    club_activities = graphene.String(required=True)
+    admission_format = graphene.String(required=True)
+    favorite_subject =  graphene.String(required=True)
+
 
   profile = graphene.Field(ProfileNode)
 
@@ -157,6 +163,12 @@ class UpdateProfileMutation(relay.ClientIDMutation):
       is_college_student = input.get('is_college_student'),
       school_name = input.get('school_name'),
       age = input.get('age'),
+      undergraduate = input.get('undergraduate'),
+      department = input.get('department'),
+      club_activities = input.get('club_activities'),
+      admission_format = input.get('admission_format'),
+      favorite_subject =  input.get('favorite_subject'),
+
       selected_gender = input.get('selected_gender'),
       selected_address = input.get('selected_address'),
       tags = input.get('tags'),

@@ -127,8 +127,8 @@ class CreateProfileMutation(relay.ClientIDMutation):
       profile_name = input.get('profile_name'),
       is_college_student = input.get('is_college_student'),
       school_name = input.get('school_name'),
-      selected_gender = input.get('selected_gender'),
-      selected_address = input.get('selected_address'),
+      selected_gender = Gender.objects.get(id=from_global_id(input.get('selected_gender'))[1]),
+      selected_address = Address.objects.get(id=from_global_id(input.get('selected_address'))[1]),
     )
     profile.save()
 
@@ -157,7 +157,8 @@ class UpdateProfileMutation(relay.ClientIDMutation):
       is_college_student = input.get('is_college_student'),
       school_name = input.get('school_name'),
       age = input.get('age'),
-      gender = input.get('gender'),
+      selected_gender = input.get('selected_gender'),
+      selected_address = input.get('selected_address'),
       tags = input.get('tags'),
     )
     if input.get('following_users') is not None:

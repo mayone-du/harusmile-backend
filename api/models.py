@@ -80,6 +80,13 @@ class Profile(models.Model):
   created_at = models.DateTimeField(auto_now_add=True)
   profile_image = models.ImageField(blank=True, null=True, upload_to=upload_avatar_path)
   age = models.PositiveSmallIntegerField(default=0)
+
+  undergraduate = models.CharField(max_length=100, default='')
+  department = models.CharField(max_length=100, default='')
+  club_activities = models.CharField(max_length=100, default='')
+  admission_format = models.CharField(max_length=100, default='')
+  favorite_subject =  models.CharField(max_length=100, default='')
+
   following_users = models.ManyToManyField(User, related_name='following_users',  blank=True)
   selected_address = models.ForeignKey(
     Address, related_name='selected_address',

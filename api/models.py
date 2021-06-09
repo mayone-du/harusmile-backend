@@ -87,6 +87,10 @@ class Profile(models.Model):
   admission_format = models.CharField(max_length=100, default='')
   favorite_subject =  models.CharField(max_length=100, default='')
 
+  # want_hear =  models.CharField(max_length=100, default='')
+  # problem =  models.CharField(max_length=100, default='')
+
+
   following_users = models.ManyToManyField(User, related_name='following_users',  blank=True)
   selected_address = models.ForeignKey(
     Address, related_name='selected_address',

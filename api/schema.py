@@ -113,6 +113,7 @@ class CreateProfileMutation(relay.ClientIDMutation):
   class Input:
     profile_name = graphene.String(required=True)
     is_college_student = graphene.Boolean(required=True)
+    telephone_number = graphene.String(required=True)
     school_name = graphene.String(required=True)
     selected_gender = graphene.ID(required=True)
     selected_address = graphene.ID(required=True)
@@ -126,6 +127,7 @@ class CreateProfileMutation(relay.ClientIDMutation):
       target_user_id=info.context.user.id,
       profile_name = input.get('profile_name'),
       is_college_student = input.get('is_college_student'),
+      telephone_number = input.get('telephone_number'),
       school_name = input.get('school_name'),
       selected_gender = Gender.objects.get(id=from_global_id(input.get('selected_gender'))[1]),
       selected_address = Address.objects.get(id=from_global_id(input.get('selected_address'))[1]),
@@ -155,6 +157,8 @@ class UpdateProfileMutation(relay.ClientIDMutation):
     club_activities = graphene.String(required=True)
     admission_format = graphene.String(required=True)
     favorite_subject =  graphene.String(required=True)
+    profile_image = Upload(required=False)
+
 
 
   profile = graphene.Field(ProfileNode)
@@ -179,6 +183,7 @@ class UpdateProfileMutation(relay.ClientIDMutation):
       problem = input.get('problem'),
       selected_gender = Gender.objects.get(id=from_global_id(input.get('selected_gender'))[1]),
       selected_address = Address.objects.get(id=from_global_id(input.get('selected_address'))[1]),
+      profile_image = input.get('profile_image'),
     )
     if input.get('following_users') is not None:
       followings_set = []

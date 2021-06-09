@@ -72,26 +72,27 @@ class Profile(models.Model):
     settings.AUTH_USER_MODEL, related_name='target_user',
     on_delete=models.CASCADE
   )
-  telephone_number = models.CharField(max_length=12, unique=True, blank=True)
+  telephone_number = models.CharField(max_length=12, unique=True, blank=True, default='')
   profile_name = models.CharField(max_length=100, default='')
   profile_text = models.CharField(max_length=1000, default='', blank=True)
   is_college_student = models.BooleanField(default=False)
   school_name = models.CharField(max_length=100, default='')
-  created_at = models.DateTimeField(auto_now_add=True)
+  created_at = models.DateTimeField(auto_now=True)
   profile_image = models.ImageField(blank=True, null=True, upload_to=upload_avatar_path)
   age = models.PositiveSmallIntegerField(default=0)
 
+  # 学部や学科（大学生用）
   undergraduate = models.CharField(max_length=100, default='')
   department = models.CharField(max_length=100, default='')
   club_activities = models.CharField(max_length=100, default='')
   admission_format = models.CharField(max_length=100, default='')
   favorite_subject =  models.CharField(max_length=100, default='')
 
-  # want_hear =  models.CharField(max_length=100, default='')
-  # problem =  models.CharField(max_length=100, default='')
+  # 望んでほしいこと、悩み
+  want_hear =  models.CharField(max_length=100, default='')
+  problem =  models.CharField(max_length=100, default='')
 
-
-  following_users = models.ManyToManyField(User, related_name='following_users',  blank=True)
+  following_users = models.ManyToManyField(User, related_name='following_users',  blank=True, default=[])
   selected_address = models.ForeignKey(
     Address, related_name='selected_address',
     on_delete=models.PROTECT, blank=True
@@ -100,7 +101,7 @@ class Profile(models.Model):
     Gender, related_name='selected_gender',
     on_delete=models.PROTECT, blank=True
   )
-  tags = models.ManyToManyField(Tag, related_name='tags', blank=True)
+  tags = models.ManyToManyField(Tag, related_name='tags', blank=True, default=[])
 
   def __str__(self):
     return self.profile_name

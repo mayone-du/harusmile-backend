@@ -139,11 +139,13 @@ class UpdateProfileMutation(relay.ClientIDMutation):
   class Input:
     id = graphene.ID(required=True)
     profile_name = graphene.String(required=True)
+    profile_text = graphene.String(required=True)
     is_college_student = graphene.Boolean(required=True)
     school_name = graphene.String(required=True)
     age = graphene.Int(required=True)
     selected_gender = graphene.ID(required=True)
     selected_address = graphene.ID(required=True)
+    telephone_number = graphene.String(required=True)
     following_users = graphene.List(graphene.ID)
     tags = graphene.List(graphene.ID)
     undergraduate = graphene.String(required=True)
@@ -158,8 +160,10 @@ class UpdateProfileMutation(relay.ClientIDMutation):
   @login_required
   def mutate_and_get_payload(root, info, **input):
     profile = Profile(
+      target_user_id = info.context.user.id,
       id = from_global_id(input.get('id'))[1],
       profile_name = input.get('profile_name'),
+      profile_text = input.get('profile_text'),
       is_college_student = input.get('is_college_student'),
       school_name = input.get('school_name'),
       age = input.get('age'),
@@ -168,10 +172,9 @@ class UpdateProfileMutation(relay.ClientIDMutation):
       club_activities = input.get('club_activities'),
       admission_format = input.get('admission_format'),
       favorite_subject =  input.get('favorite_subject'),
-
-      selected_gender = input.get('selected_gender'),
-      selected_address = input.get('selected_address'),
-      tags = input.get('tags'),
+      telephone_number = input.get('telephone_number'),
+      selected_gender = Gender.objects.get(id=from_global_id(input.get('selected_gender'))[1]),
+      selected_address = Address.objects.get(id=from_global_id(input.get('selected_address'))[1]),
     )
     if input.get('following_users') is not None:
       followings_set = []

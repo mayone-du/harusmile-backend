@@ -72,7 +72,7 @@ class Profile(models.Model):
     settings.AUTH_USER_MODEL, related_name='target_user',
     on_delete=models.CASCADE
   )
-  telephone_number = models.CharField(max_length=12, unique=True, blank=True, default='')
+  telephone_number = models.CharField(max_length=11, unique=True, blank=True, default='')
   profile_name = models.CharField(max_length=100, default='')
   profile_text = models.CharField(max_length=1000, default='', blank=True)
   is_college_student = models.BooleanField(default=False)

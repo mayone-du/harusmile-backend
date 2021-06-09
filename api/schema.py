@@ -146,6 +146,8 @@ class UpdateProfileMutation(relay.ClientIDMutation):
     selected_gender = graphene.ID(required=True)
     selected_address = graphene.ID(required=True)
     telephone_number = graphene.String(required=True)
+    want_hear = graphene.String(required=True)
+    problem = graphene.String(required=True)
     following_users = graphene.List(graphene.ID)
     tags = graphene.List(graphene.ID)
     undergraduate = graphene.String(required=True)
@@ -173,6 +175,8 @@ class UpdateProfileMutation(relay.ClientIDMutation):
       admission_format = input.get('admission_format'),
       favorite_subject =  input.get('favorite_subject'),
       telephone_number = input.get('telephone_number'),
+      want_hear = input.get('want_hear'),
+      problem = input.get('problem'),
       selected_gender = Gender.objects.get(id=from_global_id(input.get('selected_gender'))[1]),
       selected_address = Address.objects.get(id=from_global_id(input.get('selected_address'))[1]),
     )

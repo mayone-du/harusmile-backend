@@ -112,11 +112,21 @@ class CreateUserMutation(relay.ClientIDMutation):
 class CreateProfileMutation(relay.ClientIDMutation):
   class Input:
     profile_name = graphene.String(required=True)
+    profile_text = graphene.String(required=False)
     is_college_student = graphene.Boolean(required=True)
-    telephone_number = graphene.String(required=True)
     school_name = graphene.String(required=True)
+    age = graphene.Int(required=False)
     selected_gender = graphene.ID(required=True)
     selected_address = graphene.ID(required=True)
+    telephone_number = graphene.String(required=True)
+    want_hear = graphene.String(required=False)
+    problem = graphene.String(required=False)
+    undergraduate = graphene.String(required=False)
+    department = graphene.String(required=False)
+    club_activities = graphene.String(required=False)
+    admission_format = graphene.String(required=False)
+    favorite_subject =  graphene.String(required=False)
+    profile_image = Upload(required=False)
 
 
   profile = graphene.Field(ProfileNode)
@@ -124,13 +134,23 @@ class CreateProfileMutation(relay.ClientIDMutation):
   @login_required
   def mutate_and_get_payload(root, info, **input):
     profile = Profile(
-      target_user_id=info.context.user.id,
+      target_user_id = info.context.user.id,
       profile_name = input.get('profile_name'),
+      profile_text = input.get('profile_text'),
       is_college_student = input.get('is_college_student'),
-      telephone_number = input.get('telephone_number'),
       school_name = input.get('school_name'),
+      age = input.get('age'),
+      undergraduate = input.get('undergraduate'),
+      department = input.get('department'),
+      club_activities = input.get('club_activities'),
+      admission_format = input.get('admission_format'),
+      favorite_subject =  input.get('favorite_subject'),
+      telephone_number = input.get('telephone_number'),
+      want_hear = input.get('want_hear'),
+      problem = input.get('problem'),
       selected_gender = Gender.objects.get(id=from_global_id(input.get('selected_gender'))[1]),
       selected_address = Address.objects.get(id=from_global_id(input.get('selected_address'))[1]),
+      profile_image = input.get('profile_image'),
     )
     profile.save()
 

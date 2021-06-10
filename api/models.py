@@ -79,18 +79,18 @@ class Profile(models.Model):
   school_name = models.CharField(max_length=100, default='')
   created_at = models.DateTimeField(auto_now=True)
   profile_image = models.ImageField(blank=True, null=True, upload_to=upload_avatar_path)
-  age = models.PositiveSmallIntegerField(default=0)
+  age = models.PositiveSmallIntegerField(default=0, blank=True, null=True)
 
   # 学部や学科（大学生用）
-  undergraduate = models.CharField(max_length=100, default='')
-  department = models.CharField(max_length=100, default='')
-  club_activities = models.CharField(max_length=100, default='')
-  admission_format = models.CharField(max_length=100, default='')
-  favorite_subject =  models.CharField(max_length=100, default='')
+  undergraduate = models.CharField(max_length=100, default='', blank=True, null=True)
+  department = models.CharField(max_length=100, default='', blank=True, null=True)
+  club_activities = models.CharField(max_length=100, default='', blank=True, null=True)
+  admission_format = models.CharField(max_length=100, default='', blank=True, null=True)
+  favorite_subject =  models.CharField(max_length=100, default='', blank=True, null=True)
 
   # 望んでほしいこと、悩み
-  want_hear =  models.CharField(max_length=100, default='')
-  problem =  models.CharField(max_length=100, default='')
+  want_hear =  models.CharField(max_length=100, default='', blank=True, null=True)
+  problem =  models.CharField(max_length=100, default='', blank=True, null=True)
 
   following_users = models.ManyToManyField(User, related_name='following_users',  blank=True, default=[])
   selected_address = models.ForeignKey(

@@ -54,10 +54,22 @@ class ProfileNode(DjangoObjectType):
     model = Profile
     filter_fields = {
       'profile_name': ['exact', 'icontains'],
+      'profile_text': ['exact', 'icontains'],
+      'age': ['exact'],
       'is_college_student': ['exact',],
       'school_name': ['exact', 'icontains'],
+
+      'undergraduate': ['exact', 'icontains'],
+      'department': ['exact', 'icontains'],
+      'club_activities': ['exact', 'icontains'],
+      'admission_format': ['exact', 'icontains'],
+      'favorite_subject': ['exact', 'icontains'],
+      'want_hear': ['exact', 'icontains'],
+      'problem': ['exact', 'icontains'],
+
       'selected_address': ['exact'],
       'selected_gender': ['exact'],
+
     }
     interfaces = (relay.Node,)
 
@@ -400,25 +412,21 @@ class Query(graphene.ObjectType):
 
 
   # gender
-  @login_required
   def resolve_gender(self, info, **kwargs):
     id = kwargs.get('id')
     if id is not None:
       return Gender.objects.get(id=from_global_id(id)[1])
 
-  @login_required
   def resolve_all_genders(self, info, **kwargs):
     return Gender.objects.all()
 
 
   # address
-  @login_required
   def resolve_address(self, info, **kwargs):
     id = kwargs.get('id')
     if id is not None:
       return Address.objects.get(id=from_global_id(id)[1])
 
-  @login_required
   def resolve_all_addresses(self, info, **kwargs):
     return Address.objects.all()
 

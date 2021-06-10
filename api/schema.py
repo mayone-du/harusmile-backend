@@ -342,6 +342,7 @@ class Mutation(graphene.ObjectType):
   create_review = CreateReviewMutation.Field()
   token_auth = graphql_jwt.ObtainJSONWebToken.Field()
   refresh_token = graphql_jwt.Refresh.Field()
+  revoke_token = graphql_jwt.Revoke.Field()
 
 
 class Query(graphene.ObjectType):

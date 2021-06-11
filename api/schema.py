@@ -9,7 +9,7 @@ from graphql_jwt.decorators import login_required
 from graphql_relay import from_global_id
 from .models import User, Tag, Profile, Post, Review, Message, Address, Gender
 from graphene_file_upload.scalars import Upload
-
+from django.db.models import Q
 
 
 class UserNode(DjangoObjectType):
@@ -373,6 +373,9 @@ class Query(graphene.ObjectType):
   all_genders = DjangoFilterConnectionField(GenderNode)
   address = graphene.Field(AddressNode, id=graphene.NonNull(graphene.ID))
   all_addresses = DjangoFilterConnectionField(AddressNode)
+  message = graphene.Field(MessageNode, id=graphene.NonNull(graphene.ID))
+  all_messages = DjangoFilterConnectionField(MessageNode)
+  login_user_messages = DjangoFilterConnectionField(MessageNode)
 
   
 
@@ -463,4 +466,6 @@ class Query(graphene.ObjectType):
   def resolve_all_messages(self, info, **kwargs):
     return Message.objects.all()
 
-
+  # @login_required
+  def resolve_login_user_messages(self, info, **kwargs):
+    return Message.objects.filter(Q(sender=info.context.user.id) | Q(destination=info.context.user.id))

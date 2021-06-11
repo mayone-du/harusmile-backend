@@ -320,14 +320,15 @@ class CreateTalkRoomMutation(relay.ClientIDMutation):
     def mutate_and_get_payload(root, info, **input):
         talk_room = TalkRoom(
             talk_room_description=input.get('talk_room_description'),
-            # join_users=from_global_id(input.get('join_users'))[1],
         )
+        # ManyToMany時は↓で一旦saveが必要
+        talk_room.save()
 
         if input.get('join_users') is not None:
             join_users_set = []
             for join_user in input.get('join_users'):
                 join_user_id = from_global_id(join_user)[1]
-                join_user_object = User.get(id=join_user_id)
+                join_user_object = User.objects.get(id=join_user_id)
                 join_users_set.append(join_user_object)
                 talk_room.join_users.set(join_users_set)
             talk_room.save()

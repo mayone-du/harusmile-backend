@@ -47,8 +47,8 @@ class User(AbstractBaseUser, PermissionsMixin):
         return self.email
 
 
-# DM機能
 class TalkRoom(models.Model):
+    id = models.BigAutoField(auto_created=True, primary_key=True)
     talk_room_description = models.CharField(
         max_length=300, default="", blank=True, null=True)
 
@@ -57,7 +57,7 @@ class TalkRoom(models.Model):
         blank=True, default=[]
     )
     def __str__(self):
-        return str(self.join_users.email) + ' & ' + str(self.join_users.email) 
+        return str(self.talk_room_description)
 
 class Message(models.Model):
     talking_room = models.ForeignKey(

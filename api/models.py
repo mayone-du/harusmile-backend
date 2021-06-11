@@ -52,22 +52,12 @@ class TalkRoom(models.Model):
     talk_room_description = models.CharField(
         max_length=300, default="", blank=True, null=True)
 
-    def __str__(self):
-        return str(self.talk_room_description)
-
-# ユーザーのトークルーム管理用
-class Entry(models.Model):
     join_users = models.ManyToManyField(
         settings.AUTH_USER_MODEL, related_name='join_users',
         blank=True, default=[]
     )
-    entry_room = models.ForeignKey(
-        TalkRoom, related_name='entry_room', blank=True, on_delete=models.CASCADE
-    )
-
     def __str__(self):
-        return str(self.entry_room)
-
+        return str(self.join_users.email) + ' & ' + str(self.join_users.email) 
 
 class Message(models.Model):
     talking_room = models.ForeignKey(
@@ -174,10 +164,6 @@ class Post(models.Model):
 
 
 class Review(models.Model):
-    # target_post = models.ForeignKey(
-    #   Post, related_name='target_post',
-    #   on_delete=models.CASCADE
-    # )
     provider = models.ForeignKey(
         settings.AUTH_USER_MODEL, related_name='provider',
         on_delete=models.CASCADE

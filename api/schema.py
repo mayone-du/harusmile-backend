@@ -7,7 +7,7 @@ from graphene_django.filter import DjangoFilterConnectionField
 from graphene import relay
 from graphql_jwt.decorators import login_required
 from graphql_relay import from_global_id
-from .models import User, Tag, Profile, Post, Review, Message, Address, Gender, TalkRoom, Entry
+from .models import User, Tag, Profile, Post, Review, Message, Address, Gender, TalkRoom
 from graphene_file_upload.scalars import Upload
 from django.db.models import Q
 
@@ -85,13 +85,6 @@ class PostNode(DjangoObjectType):
 class TalkRoomNode(DjangoObjectType):
     class Meta:
         model = TalkRoom
-        filter_fields = {}
-        interfaces = (relay.Node,)
-
-
-class EntryNode(DjangoObjectType):
-    class Meta:
-        model = Entry
         filter_fields = {
             'join_users': ['exact']
         }
@@ -204,7 +197,6 @@ class UpdateProfileMutation(relay.ClientIDMutation):
         admission_format = graphene.String(required=True)
         favorite_subject = graphene.String(required=True)
         profile_image = Upload(required=False)
-        entry_talk_rooms = graphene.List(graphene.ID)
 
     profile = graphene.Field(ProfileNode)
 
@@ -231,17 +223,7 @@ class UpdateProfileMutation(relay.ClientIDMutation):
             selected_address=Address.objects.get(
                 id=from_global_id(input.get('selected_address'))[1]),
             profile_image=input.get('profile_image'),
-            # entry_talk_rooms = input.get('entry_talk_rooms'),
         )
-        if input.get('entry_talk_rooms') is not None:
-            entry_talk_rooms_set = []
-            for entry_talk_room in input.get('entry_talk_rooms'):
-                entry_talk_rooms_id = from_global_id(entry_talk_room)[1]
-                entry_talk_room_object = TalkRoom.objects.get(
-                    id=entry_talk_rooms_id)
-                entry_talk_rooms_set.append(entry_talk_room_object)
-                profile.entry_talk_rooms.set(entry_talk_rooms_set)
-            profile.save()
 
         if input.get('following_users') is not None:
             followings_set = []
@@ -330,47 +312,34 @@ class DeletePostMutation(relay.ClientIDMutation):
 class CreateTalkRoomMutation(relay.ClientIDMutation):
     class Input:
         talk_room_description = graphene.String(required=False)
+        join_users = graphene.List(graphene.ID)
 
     talk_room = graphene.Field(TalkRoomNode)
 
     @login_required
     def mutate_and_get_payload(root, info, **input):
         talk_room = TalkRoom(
-            talk_room_description=input.get('talk_room_description')
+            talk_room_description=input.get('talk_room_description'),
+            # join_users=from_global_id(input.get('join_users'))[1],
         )
+
+        if input.get('join_users') is not None:
+            join_users_set = []
+            for join_user in input.get('join_users'):
+                join_user_id = from_global_id(join_user)[1]
+                join_user_object = User.get(id=join_user_id)
+                join_users_set.append(join_user_object)
+                talk_room.join_users.set(join_users_set)
+            talk_room.save()
+
         talk_room.save()
         return CreateTalkRoomMutation(talk_room=talk_room)
-
-
-# トークルーム管理用フィールドの作成
-class CreateEntryMutation(relay.ClientIDMutation):
-    class Input:
-        join_users = graphene.List(graphene.ID)
-        entry_room_id = graphene.ID(required=True)
-
-    entry = graphene.Field(EntryNode)
-
-    def mutate_and_get_payload(root, info, **input):
-        entry = Entry(
-            entry_room_id=from_global_id(input.get('entry_room_id'))[1],
-        )
-        if input.get('entry_talk_rooms') is not None:
-            entry_set = []
-            for join_user in input.get('join_users'):
-                entry_user_id = from_global_id(join_user)[1]
-                entry_object = Entry.objects.get(
-                    id=entry_user_id)
-                entry_set.append(entry_object)
-                entry.entry_talk_rooms.set(entry_set)
-            entry.save()
-        entry.save()
-        return CreateEntryMutation(entry=entry)
 
 
 # メッセージ作成
 class CreateMessageMutation(relay.ClientIDMutation):
     class Input:
-        talking_room = graphene.ID(required=True)
+        talking_room_id = graphene.ID(required=True)
         text = graphene.String(required=True)
 
     message = graphene.Field(MessageNode)
@@ -378,6 +347,7 @@ class CreateMessageMutation(relay.ClientIDMutation):
     @login_required
     def mutate_and_get_payload(root, info, **input):
         message = Message(
+            talking_room_id=input.get('talking_room_id'),
             sender_user_id=info.context.user.id,
         )
         message.save()
@@ -415,7 +385,6 @@ class Mutation(graphene.ObjectType):
     delete_post = DeletePostMutation.Field()
 
     create_talk_room = CreateTalkRoomMutation().Field()
-    create_entry = CreateEntryMutation().Field()
     create_message = CreateMessageMutation.Field()
 
     create_review = CreateReviewMutation.Field()
@@ -442,7 +411,6 @@ class Query(graphene.ObjectType):
     address = graphene.Field(AddressNode, id=graphene.NonNull(graphene.ID))
     all_addresses = DjangoFilterConnectionField(AddressNode)
     all_talk_rooms = DjangoFilterConnectionField(TalkRoomNode)
-    all_entries = DjangoFilterConnectionField(EntryNode)
     message = graphene.Field(MessageNode, id=graphene.NonNull(graphene.ID))
     all_messages = DjangoFilterConnectionField(MessageNode)
     login_user_messages = DjangoFilterConnectionField(MessageNode)
@@ -527,9 +495,6 @@ class Query(graphene.ObjectType):
     # talk_room
     def resolve_all_talk_rooms(self, info, **kwargs):
         return TalkRoom.objects.all()
-
-    def resolve_all_entries(self, info, **kwargs):
-        return Entry.objects.all()
 
     # message
     @login_required

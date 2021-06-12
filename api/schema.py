@@ -1,3 +1,4 @@
+from typing import Text
 import graphene
 from graphene_django import DjangoObjectType
 from django.contrib.auth.models import User
@@ -9,7 +10,6 @@ from graphql_jwt.decorators import login_required
 from graphql_relay import from_global_id
 from .models import User, Tag, Profile, Post, Review, Message, Address, Gender, TalkRoom
 from graphene_file_upload.scalars import Upload
-from django.db.models import Q
 
 
 class UserNode(DjangoObjectType):
@@ -86,7 +86,7 @@ class TalkRoomNode(DjangoObjectType):
     class Meta:
         model = TalkRoom
         filter_fields = {
-            'join_users': ['exact']
+            'join_users': ['exact', 'icontains']
         }
         interfaces = (relay.Node,)
 
@@ -96,6 +96,8 @@ class MessageNode(DjangoObjectType):
         model = Message
         filter_fields = {
             'text': ['exact', 'icontains'],
+            'talking_room__join_users': ['exact', 'icontains'],
+            # 'text': ['exact', 'icontains'],
         }
         interfaces = (relay.Node,)
 
@@ -348,8 +350,9 @@ class CreateMessageMutation(relay.ClientIDMutation):
     @login_required
     def mutate_and_get_payload(root, info, **input):
         message = Message(
-            talking_room_id=input.get('talking_room_id'),
-            sender_user_id=info.context.user.id,
+            text = input.get('text'),
+            talking_room_id=from_global_id(input.get('talking_room_id'))[1],
+            sender_id=info.context.user.id,
         )
         message.save()
         return CreateMessageMutation(message=message)
@@ -411,6 +414,7 @@ class Query(graphene.ObjectType):
     all_genders = DjangoFilterConnectionField(GenderNode)
     address = graphene.Field(AddressNode, id=graphene.NonNull(graphene.ID))
     all_addresses = DjangoFilterConnectionField(AddressNode)
+    talk_room = graphene.Field(TalkRoomNode, id=graphene.NonNull(graphene.ID))
     all_talk_rooms = DjangoFilterConnectionField(TalkRoomNode)
     message = graphene.Field(MessageNode, id=graphene.NonNull(graphene.ID))
     all_messages = DjangoFilterConnectionField(MessageNode)
@@ -494,6 +498,14 @@ class Query(graphene.ObjectType):
         return Review.objects.all()
 
     # talk_room
+    @login_required
+    def resolve_talk_room(self, info, **kwargs):
+        id = kwargs.get('id')
+        if id is not None:
+            return TalkRoom.objects.get(id=from_global_id(id)[1])
+
+
+    @login_required
     def resolve_all_talk_rooms(self, info, **kwargs):
         return TalkRoom.objects.all()
 
@@ -508,7 +520,8 @@ class Query(graphene.ObjectType):
     def resolve_all_messages(self, info, **kwargs):
         return Message.objects.all()
 
-    # @login_required
+    @login_required
+    def resolve_login_user_messages(self, info, **kwargs):
+        return Message.objects.filter(sender=info.context.user.id)
 
-    # def resolve_login_user_messages(self, info, **kwargs):
-    #   return Message.objects.filter(Q(sender=info.context.user.id) | Q(destination=info.context.user.id))
+    

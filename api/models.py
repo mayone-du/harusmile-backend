@@ -56,6 +56,7 @@ class TalkRoom(models.Model):
         settings.AUTH_USER_MODEL, related_name='join_users',
         blank=True, default=[]
     )
+
     def __str__(self):
         return str(self.talk_room_description)
 

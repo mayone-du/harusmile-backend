@@ -60,6 +60,7 @@ class TalkRoom(models.Model):
     def __str__(self):
         return str(self.talk_room_description)
 
+
 class Message(models.Model):
     talking_room = models.ForeignKey(
         TalkRoom, related_name='talking_room', on_delete=models.PROTECT

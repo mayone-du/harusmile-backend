@@ -350,7 +350,7 @@ class CreateMessageMutation(relay.ClientIDMutation):
     @login_required
     def mutate_and_get_payload(root, info, **input):
         message = Message(
-            text = input.get('text'),
+            text=input.get('text'),
             talking_room_id=from_global_id(input.get('talking_room_id'))[1],
             sender_id=info.context.user.id,
         )
@@ -432,7 +432,7 @@ class Query(graphene.ObjectType):
     def resolve_user(self, info, **kwargs):
         id = kwargs.get('id')
         if id is not None:
-          return get_user_model().objects.get(id=from_global_id(id)[1])
+            return get_user_model().objects.get(id=from_global_id(id)[1])
 
     @login_required
     def resolve_all_users(self, info, **kwargs):
@@ -505,7 +505,6 @@ class Query(graphene.ObjectType):
         if id is not None:
             return TalkRoom.objects.get(id=from_global_id(id)[1])
 
-
     @login_required
     def resolve_all_talk_rooms(self, info, **kwargs):
         return TalkRoom.objects.all()
@@ -524,5 +523,3 @@ class Query(graphene.ObjectType):
     @login_required
     def resolve_login_user_messages(self, info, **kwargs):
         return Message.objects.filter(sender=info.context.user.id)
-
-    

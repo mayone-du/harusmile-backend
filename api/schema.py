@@ -1,15 +1,18 @@
 from typing import Text
+
 import graphene
-from graphene_django import DjangoObjectType
-from django.contrib.auth.models import User
-from django.contrib.auth import get_user_model
 import graphql_jwt
-from graphene_django.filter import DjangoFilterConnectionField
+from django.contrib.auth import get_user_model
+from django.contrib.auth.models import User
 from graphene import relay
+from graphene_django import DjangoObjectType
+from graphene_django.filter import DjangoFilterConnectionField
+from graphene_file_upload.scalars import Upload
 from graphql_jwt.decorators import login_required
 from graphql_relay import from_global_id
-from .models import User, Tag, Profile, Post, Review, Message, Address, Gender, TalkRoom
-from graphene_file_upload.scalars import Upload
+
+from .models import (Address, Gender, Message, Post, Profile, Review, Tag,
+                     TalkRoom, User)
 
 
 class UserNode(DjangoObjectType):
@@ -55,7 +58,7 @@ class ProfileNode(DjangoObjectType):
             'profile_name': ['exact', 'icontains'],
             'profile_text': ['exact', 'icontains'],
             'age': ['exact'],
-            'is_college_student': ['exact', ],
+            'is_college_student': ['exact'],
             'school_name': ['exact', 'icontains'],
 
             'undergraduate': ['exact', 'icontains'],
@@ -404,6 +407,8 @@ class Query(graphene.ObjectType):
     all_users = DjangoFilterConnectionField(UserNode)
     profile = graphene.Field(ProfileNode, id=graphene.NonNull(graphene.ID))
     all_profiles = DjangoFilterConnectionField(ProfileNode)
+    high_school_profiles = DjangoFilterConnectionField(ProfileNode)
+    collage_profiles = DjangoFilterConnectionField(ProfileNode)
     post = graphene.Field(PostNode, id=graphene.NonNull(graphene.ID))
     all_posts = DjangoFilterConnectionField(PostNode)
     tag = graphene.Field(TagNode, id=graphene.NonNull(graphene.ID))
@@ -446,6 +451,13 @@ class Query(graphene.ObjectType):
 
     def resolve_all_profiles(self, info, **kwargs):
         return Profile.objects.all()
+
+    # high_school_profiles
+    def resolve_high_school_profiles(self, info, **kwargs):
+        return Profile.objects.filter(is_college_student=False)
+    # collage_profiles
+    def resolve_collage_profiles(self, info, **kwargs):
+        return Profile.objects.filter(is_college_student=True)
 
     # post
     def resolve_post(self, info, **kwargs):

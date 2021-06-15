@@ -227,8 +227,15 @@ class UpdateProfileMutation(relay.ClientIDMutation):
                 id=from_global_id(input.get('selected_gender'))[1]),
             selected_address=Address.objects.get(
                 id=from_global_id(input.get('selected_address'))[1]),
-            profile_image=input.get('profile_image'),
+            # profile_image=input.get('profile_image'),
         )
+
+        if input.get('profile_image') is not None:
+            profile.profile_image = input.get('profile_image')
+        else:
+            my_profile = Profile.objects.get(
+                id=from_global_id(input.get('id'))[1])
+            profile.profile_image = my_profile.profile_image
 
         if input.get('following_users') is not None:
             followings_set = []
@@ -456,6 +463,7 @@ class Query(graphene.ObjectType):
     def resolve_high_school_profiles(self, info, **kwargs):
         return Profile.objects.filter(is_college_student=False)
     # collage_profiles
+
     def resolve_collage_profiles(self, info, **kwargs):
         return Profile.objects.filter(is_college_student=True)
 

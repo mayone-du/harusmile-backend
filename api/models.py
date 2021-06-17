@@ -1,6 +1,7 @@
-from django.db import models
-from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
 from django.conf import settings
+from django.contrib.auth.models import (AbstractBaseUser, BaseUserManager,
+                                        PermissionsMixin)
+from django.db import models
 from django.utils import tree
 
 # Create your models here.
@@ -73,7 +74,7 @@ class Message(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return str(self.sender) + self.text
+        return self.sender.target_user.profile_name + ' から ' + '"' + self.text + '"'
 
 
 class Tag(models.Model):
@@ -178,4 +179,4 @@ class Review(models.Model):
     stars = models.PositiveSmallIntegerField()
 
     def __str__(self):
-        return self.provider.email + ' <- ' + '"' + self.review_text + '"' + ' :from: ' + self.customer.email
+        return self.customer.target_user.profile_name + ' から ' + self.provider.target_user.profile_name + ' へ ' + '"' + self.review_text + '"'

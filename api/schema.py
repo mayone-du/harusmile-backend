@@ -380,8 +380,8 @@ class CreateReviewMutation(relay.ClientIDMutation):
     @login_required
     def mutate_and_get_payload(root, info, **input):
         review = Review(
-            provider=from_global_id(input.get('provider'))[1],
-            reviewed_user_id=info.context.user.id,
+            provider_id=from_global_id(input.get('provider'))[1],
+            customer_id=info.context.user.id,
             review_text=input.get('review_text'),
             stars=input.get('stars'),
         )

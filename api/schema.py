@@ -111,6 +111,7 @@ class ReviewNode(DjangoObjectType):
         filter_fields = {
             'stars': ['exact'],
             'review_text': ['exact', 'icontains'],
+            'customer_id': ['exact']
         }
         interfaces = (relay.Node,)
 
@@ -422,6 +423,7 @@ class Query(graphene.ObjectType):
     all_tags = DjangoFilterConnectionField(TagNode)
     review = graphene.Field(ReviewNode, id=graphene.NonNull(graphene.ID))
     all_reviews = DjangoFilterConnectionField(ReviewNode)
+    login_user_reviews = DjangoFilterConnectionField(ReviewNode)
     gender = graphene.Field(GenderNode, id=graphene.NonNull(graphene.ID))
     all_genders = DjangoFilterConnectionField(GenderNode)
     address = graphene.Field(AddressNode, id=graphene.NonNull(graphene.ID))
@@ -528,6 +530,10 @@ class Query(graphene.ObjectType):
     @login_required
     def resolve_all_talk_rooms(self, info, **kwargs):
         return TalkRoom.objects.all()
+
+    @login_required
+    def resolve_login_user_reviews(self, info, **kwargs):
+        return Review.objects.filter(provider=info.context.user.id)
 
     # message
     @login_required

@@ -180,3 +180,24 @@ class Review(models.Model):
 
     def __str__(self):
         return self.customer.target_user.profile_name + ' から ' + self.provider.target_user.profile_name + ' へ ' + '"' + self.review_text + '"'
+
+
+class Notification(models.Model):
+    is_checked = models.BooleanField(default=False)
+    notificator = models.ForeignKey(
+        settings.AUTH_USER_MODEL, related_name='notificator',
+        on_delete=models.CASCADE
+    )
+    receiver = models.ForeignKey(
+        settings.AUTH_USER_MODEL, related_name='receiver',
+        on_delete=models.CASCADE
+    )
+    notification_message = models.ForeignKey(
+        Message, on_delete=models.CASCADE, blank=True, null=True
+    )
+    notification_review = models.ForeignKey(
+        Review, on_delete=models.CASCADE, blank=True, null=True
+    )
+
+    def __str__(self):
+        return self.notificator.email + ' から ' + self.receiver + 'へ'

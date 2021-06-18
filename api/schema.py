@@ -4,6 +4,7 @@ import graphene
 import graphql_jwt
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import User
+from django.utils import tree
 from graphene import relay
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
@@ -11,8 +12,8 @@ from graphene_file_upload.scalars import Upload
 from graphql_jwt.decorators import login_required
 from graphql_relay import from_global_id
 
-from .models import (Address, Gender, Message, Post, Profile, Review, Tag,
-                     TalkRoom, User)
+from .models import (Address, Gender, Message, Notification, Post, Profile,
+                     Review, Tag, TalkRoom, User)
 
 
 class UserNode(DjangoObjectType):
@@ -100,7 +101,6 @@ class MessageNode(DjangoObjectType):
         filter_fields = {
             'text': ['exact', 'icontains'],
             'talking_room__join_users': ['exact', 'icontains'],
-            # 'text': ['exact', 'icontains'],
         }
         interfaces = (relay.Node,)
 
@@ -112,6 +112,16 @@ class ReviewNode(DjangoObjectType):
             'stars': ['exact'],
             'review_text': ['exact', 'icontains'],
             'customer_id': ['exact']
+        }
+        interfaces = (relay.Node,)
+
+
+class NotificationNode(DjangoObjectType):
+    class Meta:
+        model = Notification
+        filter_fields = {
+            'is_checked': ['exact'],
+            'receiver': ['exact']
         }
         interfaces = (relay.Node,)
 
@@ -388,6 +398,49 @@ class CreateReviewMutation(relay.ClientIDMutation):
         )
         review.save()
         return CreateReviewMutation(review=review)
+
+
+class CreateNotificationMutation(relay.ClientIDMutation):
+    class Input:
+        receiver = graphene.ID(required=True)
+        notification_message = graphene.ID(required=False)
+        notification_review = graphene.ID(required=False)
+
+    notification = graphene.Field(NotificationNode)
+
+    @login_required
+    def mutate_and_get_payload(root, info, **input):
+        notification = Notification(
+            is_checked=False,
+            notificator_id=from_global_id(info.context.user.id)[1],
+            receiver_id=from_global_id(input.get('receiver')[1]),
+        )
+        if input.get('notification_message') is not None:
+            notification.notification_message = from_global_id(
+                input.get('notification_message')[1])
+
+        if input.get('notification_review') is not None:
+            notification.notification_review = from_global_id(
+                input.get('notification_review')[1])
+        notification.save()
+        return CreateNotificationMutation(notification=notification)
+
+
+class UpdateNotificationMutation(relay.ClientIDMutation):
+    class Input:
+        id = graphene.ID(required=True)
+        is_checked = graphene.Boolean(required=True)
+
+    notification = graphene.Field(NotificationNode)
+
+    @login_required
+    def mutate_and_get_payload(root, info, **input):
+        notification = Notification(
+            id=from_global_id(input.get('id')[1]),
+            is_checked=input.get('is_checked'),
+        )
+        notification.save()
+        return CreateNotificationMutation(notification=notification)
 
 
 class Mutation(graphene.ObjectType):

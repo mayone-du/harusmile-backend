@@ -420,21 +420,27 @@ class CreateNotificationMutation(relay.ClientIDMutation):
         return CreateNotificationMutation(notification=notification)
 
 
-class UpdateNotificationMutation(relay.ClientIDMutation):
+class UpdateNotificationsMutation(relay.ClientIDMutation):
     class Input:
-        id = graphene.ID(required=True)
-        is_checked = graphene.Boolean(required=True)
+        notification_ids = graphene.List(graphene.ID)
 
     notification = graphene.Field(NotificationNode)
 
     @login_required
     def mutate_and_get_payload(root, info, **input):
-        notification = Notification(
-            id=from_global_id(input.get('id')[1]),
-            is_checked=input.get('is_checked'),
-        )
+        notification = Notification()
+        if input.get('notification_ids') is not None:
+            for notification_id in input.get('notification_ids'):
+                notification = ''
+                notification_object = Notification.objects.get(
+                    id=from_global_id(notification_id)[1])
+                notification_object.is_checked = True
+                notification_object.notificator_id = notification_object.notificator_id
+                notification_object.receiver_id = notification_object.receiver_id
+                notification = notification_object
+                notification.save()
         notification.save()
-        return UpdateNotificationMutation(notification=notification)
+        return UpdateNotificationsMutation(notification=notification)
 
 
 class Mutation(graphene.ObjectType):
@@ -452,7 +458,7 @@ class Mutation(graphene.ObjectType):
     create_review = CreateReviewMutation.Field()
 
     create_notification = CreateNotificationMutation.Field()
-    update_notification = UpdateNotificationMutation.Field()
+    update_notifications = UpdateNotificationsMutation.Field()
 
     token_auth = graphql_jwt.ObtainJSONWebToken.Field()
     refresh_token = graphql_jwt.Refresh.Field()

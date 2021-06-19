@@ -457,6 +457,9 @@ class Mutation(graphene.ObjectType):
 
     create_review = CreateReviewMutation.Field()
 
+    create_notification = CreateNotificationMutation.Field()
+    update_notification = UpdateNotificationMutation.Field()
+
     token_auth = graphql_jwt.ObtainJSONWebToken.Field()
     refresh_token = graphql_jwt.Refresh.Field()
     revoke_token = graphql_jwt.Revoke.Field()
@@ -486,6 +489,9 @@ class Query(graphene.ObjectType):
     message = graphene.Field(MessageNode, id=graphene.NonNull(graphene.ID))
     all_messages = DjangoFilterConnectionField(MessageNode)
     login_user_messages = DjangoFilterConnectionField(MessageNode)
+    notification = graphene.Field(
+        NotificationNode, id=graphene.NonNull(graphene.ID))
+    login_user_notifications = DjangoFilterConnectionField(NotificationNode)
 
     # login_user
 
@@ -602,3 +608,13 @@ class Query(graphene.ObjectType):
     @login_required
     def resolve_login_user_messages(self, info, **kwargs):
         return Message.objects.filter(sender=info.context.user.id)
+
+    @login_required
+    def resolve_notification(self, info, **kwargs):
+        id = kwargs.get('id')
+        if id is not None:
+            return Notification.objects.get(id=from_global_id(id)[1])
+
+    @login_required
+    def resolve_login_user_notifications(self, info, **kwargs):
+        return Notification.objects.filter(receiver=info.context.user.id)

@@ -195,4 +195,4 @@ class Notification(models.Model):
     notification_type = models.CharField(max_length=20)
 
     def __str__(self):
-        return self.notificator.email + ' から ' + self.receiver + 'へ'
+        return self.notificator.email + ' から ' + self.receiver.email + 'へ'

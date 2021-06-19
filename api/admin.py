@@ -1,5 +1,7 @@
 from django.contrib import admin
-from .models import User, Profile, Post, Message, Review, Tag, Address, Gender, TalkRoom
+
+from .models import (Address, Gender, Message, Notification, Post, Profile,
+                     Review, Tag, TalkRoom, User)
 
 # Register your models here.
 
@@ -12,3 +14,4 @@ admin.site.register(Tag)
 admin.site.register(Address)
 admin.site.register(Gender)
 admin.site.register(TalkRoom)
+admin.site.register(Notification)

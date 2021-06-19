@@ -403,8 +403,7 @@ class CreateReviewMutation(relay.ClientIDMutation):
 class CreateNotificationMutation(relay.ClientIDMutation):
     class Input:
         receiver = graphene.ID(required=True)
-        notification_message = graphene.ID(required=False)
-        notification_review = graphene.ID(required=False)
+        notification_type = graphene.String(required=True)
 
     notification = graphene.Field(NotificationNode)
 
@@ -412,16 +411,11 @@ class CreateNotificationMutation(relay.ClientIDMutation):
     def mutate_and_get_payload(root, info, **input):
         notification = Notification(
             is_checked=False,
-            notificator_id=from_global_id(info.context.user.id)[1],
-            receiver_id=from_global_id(input.get('receiver')[1]),
+            notificator_id=info.context.user.id,
+            receiver_id=from_global_id(input.get('receiver'))[1],
+            notification_type=input.get('notification_type')
         )
-        if input.get('notification_message') is not None:
-            notification.notification_message = from_global_id(
-                input.get('notification_message')[1])
 
-        if input.get('notification_review') is not None:
-            notification.notification_review = from_global_id(
-                input.get('notification_review')[1])
         notification.save()
         return CreateNotificationMutation(notification=notification)
 
@@ -440,7 +434,7 @@ class UpdateNotificationMutation(relay.ClientIDMutation):
             is_checked=input.get('is_checked'),
         )
         notification.save()
-        return CreateNotificationMutation(notification=notification)
+        return UpdateNotificationMutation(notification=notification)
 
 
 class Mutation(graphene.ObjectType):

@@ -192,12 +192,7 @@ class Notification(models.Model):
         settings.AUTH_USER_MODEL, related_name='receiver',
         on_delete=models.CASCADE
     )
-    notification_message = models.ForeignKey(
-        Message, on_delete=models.CASCADE, blank=True, null=True
-    )
-    notification_review = models.ForeignKey(
-        Review, on_delete=models.CASCADE, blank=True, null=True
-    )
+    notification_type = models.CharField(max_length=20)
 
     def __str__(self):
         return self.notificator.email + ' から ' + self.receiver + 'へ'

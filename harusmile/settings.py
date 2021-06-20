@@ -30,7 +30,7 @@ SECRET_KEY = config('SECRET_KEY')
 DEBUG = config('DEBUG', default=False, cast=bool)
 
 # 開発環境と本番環境で分ける必要あり
-ALLOWED_HOSTS = ["harusmile-backend.herokuapp.com", "127.0.0.1"]
+ALLOWED_HOSTS = ["harusmile-backend.herokuapp.com", "localhost"]
 
 
 # Application definition

@@ -615,6 +615,6 @@ class Query(graphene.ObjectType):
         if id is not None:
             return Notification.objects.get(id=from_global_id(id)[1])
 
-    @login_required
+    # @login_required
     def resolve_login_user_notifications(self, info, **kwargs):
         return Notification.objects.filter(receiver=info.context.user.id)

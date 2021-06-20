@@ -573,13 +573,13 @@ class Query(graphene.ObjectType):
         return Tag.objects.all()
 
     # review
-    @login_required
+    # @login_required
     def resolve_review(self, info, **kwargs):
         id = kwargs.get('id')
         if id is not None:
             return Review.objects.get(id=from_global_id(id)[1])
 
-    @login_required
+    # @login_required
     def resolve_all_reviews(self, info, **kwargs):
         return Review.objects.all()
 
@@ -594,7 +594,7 @@ class Query(graphene.ObjectType):
     def resolve_all_talk_rooms(self, info, **kwargs):
         return TalkRoom.objects.all()
 
-    @login_required
+    # @login_required
     def resolve_login_user_reviews(self, info, **kwargs):
         return Review.objects.filter(provider=info.context.user.id)
 

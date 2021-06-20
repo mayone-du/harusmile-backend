@@ -77,6 +77,7 @@ CORS_ALLOWED_ORIGINS = [
     "https://harusmile.vercel.app",
 ]
 
+CORS_ALLOW_ALL_ORIGINS = True
 
 TEMPLATES = [
     {

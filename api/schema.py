@@ -15,6 +15,10 @@ from graphql_relay import from_global_id
 from .models import (Address, Gender, Message, Notification, Post, Profile,
                      Review, Tag, TalkRoom, User)
 
+# from django.core.mail import send_mail
+#         send_mail(subject='subject', message='message', from_email=None,
+#   recipient_list = ['cocomayo1201@icloud.com'], fail_silently = False)
+
 
 class UserNode(DjangoObjectType):
     class Meta:

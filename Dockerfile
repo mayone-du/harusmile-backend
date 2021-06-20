@@ -14,6 +14,8 @@ RUN \
   django-graphql-jwt \
   pyjwt==1.7.0 \
   python-decouple \
+  cloudinary \
+  django-cloudinary-storage \
   psycopg2-binary \
   gunicorn
 

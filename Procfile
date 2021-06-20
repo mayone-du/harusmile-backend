@@ -1,0 +1,1 @@
+web: gunicorn harusmile.wsgi --log-file -

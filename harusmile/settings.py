@@ -14,6 +14,7 @@ from datetime import timedelta
 from pathlib import Path
 
 from decouple import config
+from dj_database_url import parse as dburl
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -28,7 +29,8 @@ SECRET_KEY = config('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=False, cast=bool)
 
-ALLOWED_HOSTS = ['*']
+# 開発環境と本番環境で分ける必要あり
+ALLOWED_HOSTS = ["harusmile-backend.herokuapp.com", "127.0.0.1"]
 
 
 # Application definition
@@ -96,7 +98,7 @@ WSGI_APPLICATION = 'harusmile.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
-
+# local
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -107,6 +109,13 @@ DATABASES = {
         'ATOMIC_REQUESTS': True,
     }
 }
+
+# production
+# default_dburl = "sqlite:///" + str(BASE_DIR / "db.sqlite3")
+# DATABASES = {
+#     'default': config("DATABASE_URL", default=default_dburl, cast=dburl)
+# }
+
 
 GRAPHENE = {'SCHEMA': 'harusmile.schema.schema',
             'MIDDLEWARE': [

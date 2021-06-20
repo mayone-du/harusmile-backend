@@ -109,12 +109,12 @@ DATABASES = {
         'ATOMIC_REQUESTS': True,
     }
 }
-
+# ! 上下のDBごとに情報がことなるから注意。上のはlocal、下のはproduction用。
 # production
-# default_dburl = "sqlite:///" + str(BASE_DIR / "db.sqlite3")
-# DATABASES = {
-#     'default': config("DATABASE_URL", default=default_dburl, cast=dburl)
-# }
+default_dburl = "sqlite:///" + str(BASE_DIR / "db.sqlite3")
+DATABASES = {
+    'default': config("DATABASE_URL", default=default_dburl, cast=dburl)
+}
 
 
 GRAPHENE = {'SCHEMA': 'harusmile.schema.schema',

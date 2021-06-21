@@ -150,18 +150,19 @@ class Profile(models.Model):
         return self.profile_name
 
 
-class Post(models.Model):
-    posted_user = models.ForeignKey(
+class Plan(models.Model):
+    created_user = models.ForeignKey(
         settings.AUTH_USER_MODEL, related_name='posted_user',
         on_delete=models.CASCADE
     )
     title = models.CharField(max_length=100)
     content = models.CharField(max_length=1000)
-    post_image = models.ImageField(
+    plan_image = models.ImageField(
         blank=True, null=True, upload_to=upload_post_path)
     is_published = models.BooleanField(default=False)
     published_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    price = models.PositiveSmallIntegerField(default=0)
 
     def __str__(self):
         return self.title

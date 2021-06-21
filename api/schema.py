@@ -13,7 +13,7 @@ from graphene_file_upload.scalars import Upload
 from graphql_jwt.decorators import login_required
 from graphql_relay import from_global_id
 
-from .models import (Address, Gender, Message, Notification, Post, Profile,
+from .models import (Address, Gender, Message, Notification, Plan, Profile,
                      Review, Tag, TalkRoom, User)
 
 
@@ -77,12 +77,14 @@ class ProfileNode(DjangoObjectType):
         interfaces = (relay.Node,)
 
 
-class PostNode(DjangoObjectType):
+class PlanNode(DjangoObjectType):
     class Meta:
-        model = Post
+        model = Plan
         filter_fields = {
             'title': ['exact', 'icontains'],
             'content': ['exact', 'icontains'],
+            'is_published': ['exact'],
+            'price': ['exact']
         }
         interfaces = (relay.Node,)
 
@@ -244,6 +246,7 @@ class UpdateProfileMutation(relay.ClientIDMutation):
             # profile_image=input.get('profile_image'),
         )
 
+        # プロフィール画像が設定されていなかったら以前のまま更新しない
         if input.get('profile_image') is not None:
             profile.profile_image = input.get('profile_image')
         else:
@@ -273,65 +276,72 @@ class UpdateProfileMutation(relay.ClientIDMutation):
         return UpdateProfileMutation(profile=profile)
 
 
-class CreatePostMutation(relay.ClientIDMutation):
+class CreatePlanMutation(relay.ClientIDMutation):
     class Input:
         title = graphene.String(required=True)
         content = graphene.String(required=True)
-        post_image = Upload(required=False)
+        plan_image = Upload(required=False)
         is_published = graphene.Boolean(required=True)
 
-    post = graphene.Field(PostNode)
+    plan = graphene.Field(PlanNode)
 
     @login_required
     def mutate_and_get_payload(root, info, **input):
-        post = Post(
-            posted_user_id=info.context.user.id,
+        plan = Plan(
+            created_user_id=info.context.user.id,
             title=input.get('title'),
             content=input.get('content'),
-            post_image=input.get('post_image'),
+            plan_image=input.get('plan_image'),
             is_published=input.get('is_published'),
         )
-        post.save()
+        plan.save()
 
-        return CreatePostMutation(post=post)
+        return CreatePlanMutation(plan=plan)
 
 
-class UpdatePostMutation(relay.ClientIDMutation):
+class UpdatePlanMutation(relay.ClientIDMutation):
     class Input:
         id = graphene.ID(required=True)
         title = graphene.String(required=False)
         content = graphene.String(required=False)
-        post_image = Upload(required=False)
+        plan_image = Upload(required=False)
         is_published = graphene.Boolean(required=False)
 
-    post = graphene.Field(PostNode)
+    plan = graphene.Field(PlanNode)
 
     @login_required
     def mutate_and_get_payload(root, info, **input):
-        post = Post(
+        plan = Plan(
             id=from_global_id(input.get('id'))[1],
             title=input.get('title'),
             content=input.get('content'),
-            post_image=input.get('post_image'),
             is_published=input.get('is_published'),
         )
-        post.save()
-        return UpdatePostMutation(post=post)
+
+        if input.get('plan_image') is not None:
+            plan.plan_image = input.get('plan_image')
+        else:
+            selected_plan = Plan.objects.get(
+                id=from_global_id(input.get('id'))[1])
+            plan.plan_image = selected_plan.plan_image
+
+        plan.save()
+        return UpdatePlanMutation(plan=plan)
 
 
-class DeletePostMutation(relay.ClientIDMutation):
+class DeletePlanMutation(relay.ClientIDMutation):
     class Input:
         id = graphene.ID(required=True)
 
-    post = graphene.Field(PostNode)
+    plan = graphene.Field(PlanNode)
 
     @login_required
     def mutate_and_get_payload(root, info, **input):
-        post = Post(
+        plan = Plan(
             id=from_global_id(input.get('id'))[1],
         )
-        post.delete()
-        return DeletePostMutation(post=post)
+        plan.delete()
+        return DeletePlanMutation(plan=plan)
 
 
 # トークルーム作成用
@@ -451,9 +461,9 @@ class Mutation(graphene.ObjectType):
     create_profile = CreateProfileMutation.Field()
     update_profile = UpdateProfileMutation.Field()
 
-    create_post = CreatePostMutation.Field()
-    update_post = UpdatePostMutation.Field()
-    delete_post = DeletePostMutation.Field()
+    create_plan = CreatePlanMutation.Field()
+    update_plan = UpdatePlanMutation.Field()
+    delete_plan = DeletePlanMutation.Field()
 
     create_talk_room = CreateTalkRoomMutation().Field()
     create_message = CreateMessageMutation.Field()
@@ -476,8 +486,8 @@ class Query(graphene.ObjectType):
     all_profiles = DjangoFilterConnectionField(ProfileNode)
     high_school_profiles = DjangoFilterConnectionField(ProfileNode)
     collage_profiles = DjangoFilterConnectionField(ProfileNode)
-    post = graphene.Field(PostNode, id=graphene.NonNull(graphene.ID))
-    all_posts = DjangoFilterConnectionField(PostNode)
+    plan = graphene.Field(PlanNode, id=graphene.NonNull(graphene.ID))
+    all_plans = DjangoFilterConnectionField(PlanNode)
     tag = graphene.Field(TagNode, id=graphene.NonNull(graphene.ID))
     all_tags = DjangoFilterConnectionField(TagNode)
     review = graphene.Field(ReviewNode, id=graphene.NonNull(graphene.ID))
@@ -531,14 +541,14 @@ class Query(graphene.ObjectType):
     def resolve_collage_profiles(self, info, **kwargs):
         return Profile.objects.filter(is_college_student=True)
 
-    # post
-    def resolve_post(self, info, **kwargs):
+    # plan
+    def resolve_plan(self, info, **kwargs):
         id = kwargs.get('id')
         if id is not None:
-            return Post.objects.get(id=from_global_id(id)[1])
+            return Plan.objects.get(id=from_global_id(id)[1])
 
-    def resolve_all_posts(self, info, **kwargs):
-        return Post.objects.all()
+    def resolve_all_plans(self, info, **kwargs):
+        return Plan.objects.all()
 
     # gender
 

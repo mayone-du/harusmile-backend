@@ -5,6 +5,7 @@ import graphql_jwt
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
+from django.db.models.fields import related
 from django.utils import tree
 from graphene import relay
 from graphene_django import DjangoObjectType
@@ -488,6 +489,7 @@ class Query(graphene.ObjectType):
     collage_profiles = DjangoFilterConnectionField(ProfileNode)
     plan = graphene.Field(PlanNode, id=graphene.NonNull(graphene.ID))
     all_plans = DjangoFilterConnectionField(PlanNode)
+    login_user_plans = DjangoFilterConnectionField(PlanNode)
     tag = graphene.Field(TagNode, id=graphene.NonNull(graphene.ID))
     all_tags = DjangoFilterConnectionField(TagNode)
     review = graphene.Field(ReviewNode, id=graphene.NonNull(graphene.ID))
@@ -549,6 +551,9 @@ class Query(graphene.ObjectType):
 
     def resolve_all_plans(self, info, **kwargs):
         return Plan.objects.all()
+
+    def resolve_login_user_plans(self, info, **kwargs):
+        return Plan.objects.filter(created_user=info.context.user.id)
 
     # gender
 

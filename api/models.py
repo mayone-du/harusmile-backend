@@ -49,35 +49,6 @@ class User(AbstractBaseUser, PermissionsMixin):
         return self.email
 
 
-class TalkRoom(models.Model):
-    id = models.BigAutoField(auto_created=True, primary_key=True)
-    talk_room_description = models.CharField(
-        max_length=300, default="", blank=True, null=True)
-
-    join_users = models.ManyToManyField(
-        settings.AUTH_USER_MODEL, related_name='join_users',
-        blank=True, default=[]
-    )
-
-    def __str__(self):
-        return str(self.talk_room_description)
-
-
-class Message(models.Model):
-    talking_room = models.ForeignKey(
-        TalkRoom, related_name='talking_room', on_delete=models.PROTECT
-    )
-    sender = models.ForeignKey(
-        settings.AUTH_USER_MODEL, related_name='sender',
-        on_delete=models.PROTECT
-    )
-    text = models.CharField(max_length=1000)
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return self.sender.target_user.profile_name + ' から ' + '"' + self.text + '"'
-
-
 class Tag(models.Model):
     tag_name = models.CharField(max_length=100, unique=True)
 
@@ -165,7 +136,7 @@ class Plan(models.Model):
     price = models.PositiveSmallIntegerField(default=0)
 
     def __str__(self):
-        return self.title
+        return self.created_user.email + ' のプラン名 ' + self.title
 
 
 class Review(models.Model):
@@ -200,3 +171,36 @@ class Notification(models.Model):
 
     def __str__(self):
         return self.notificator.email + ' から ' + self.receiver.email + 'へ'
+
+
+class TalkRoom(models.Model):
+    id = models.BigAutoField(auto_created=True, primary_key=True)
+    talk_room_description = models.CharField(
+        max_length=300, default="", blank=True, null=True)
+
+    join_users = models.ManyToManyField(
+        settings.AUTH_USER_MODEL, related_name='join_users',
+        blank=True, default=[]
+    )
+
+    selected_plan = models.ForeignKey(
+        Plan, related_name='selected_plan', on_delete=models.CASCADE
+    )
+
+    def __str__(self):
+        return str(self.talk_room_description)
+
+
+class Message(models.Model):
+    talking_room = models.ForeignKey(
+        TalkRoom, related_name='talking_room', on_delete=models.PROTECT
+    )
+    sender = models.ForeignKey(
+        settings.AUTH_USER_MODEL, related_name='sender',
+        on_delete=models.PROTECT
+    )
+    text = models.CharField(max_length=1000)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.sender.target_user.profile_name + ' から ' + '"' + self.text + '"'

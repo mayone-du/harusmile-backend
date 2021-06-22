@@ -122,8 +122,8 @@ class Profile(models.Model):
 
 
 class Plan(models.Model):
-    created_user = models.ForeignKey(
-        settings.AUTH_USER_MODEL, related_name='posted_user',
+    plan_author = models.ForeignKey(
+        settings.AUTH_USER_MODEL, related_name='plan_author',
         on_delete=models.CASCADE
     )
     title = models.CharField(max_length=100)

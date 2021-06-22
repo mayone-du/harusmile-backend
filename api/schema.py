@@ -289,7 +289,7 @@ class CreatePlanMutation(relay.ClientIDMutation):
     @login_required
     def mutate_and_get_payload(root, info, **input):
         plan = Plan(
-            created_user_id=info.context.user.id,
+            plan_author_id=info.context.user.id,
             title=input.get('title'),
             content=input.get('content'),
             plan_image=input.get('plan_image'),
@@ -350,6 +350,7 @@ class CreateTalkRoomMutation(relay.ClientIDMutation):
     class Input:
         talk_room_description = graphene.String(required=False)
         join_users = graphene.List(graphene.ID)
+        selected_plan = graphene.ID(required=True)
 
     talk_room = graphene.Field(TalkRoomNode)
 
@@ -357,6 +358,7 @@ class CreateTalkRoomMutation(relay.ClientIDMutation):
     def mutate_and_get_payload(root, info, **input):
         talk_room = TalkRoom(
             talk_room_description=input.get('talk_room_description'),
+            selected_plan=input.get('selected_plan'),
         )
         # ManyToMany時は↓で一旦saveが必要
         talk_room.save()
@@ -553,7 +555,7 @@ class Query(graphene.ObjectType):
         return Plan.objects.all()
 
     def resolve_login_user_plans(self, info, **kwargs):
-        return Plan.objects.filter(created_user=info.context.user.id)
+        return Plan.objects.filter(plan_author=info.context.user.id)
 
     # gender
 

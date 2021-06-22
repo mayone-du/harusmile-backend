@@ -184,7 +184,8 @@ class TalkRoom(models.Model):
     )
 
     selected_plan = models.ForeignKey(
-        Plan, related_name='selected_plan', on_delete=models.CASCADE
+        Plan, related_name='selected_plan', on_delete=models.CASCADE,
+        blank=True, null=True
     )
 
     def __str__(self):

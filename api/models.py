@@ -136,7 +136,7 @@ class Plan(models.Model):
     price = models.PositiveSmallIntegerField(default=0)
 
     def __str__(self):
-        return self.created_user.email + ' のプラン名 ' + self.title
+        return self.plan_author.email + ' のプラン名 ' + self.title
 
 
 class Review(models.Model):
@@ -178,14 +178,19 @@ class TalkRoom(models.Model):
     talk_room_description = models.CharField(
         max_length=300, default="", blank=True, null=True)
 
-    join_users = models.ManyToManyField(
-        settings.AUTH_USER_MODEL, related_name='join_users',
-        blank=True, default=[]
-    )
+    # join_users = models.ManyToManyField(
+    #     settings.AUTH_USER_MODEL, related_name='join_users',
+    #     blank=True, default=[]
+    # )
 
     selected_plan = models.ForeignKey(
         Plan, related_name='selected_plan', on_delete=models.CASCADE,
         blank=True, null=True
+    )
+
+    opponent_user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, related_name='opponent_user',
+        on_delete=models.CASCADE, blank=True, null=True
     )
 
     def __str__(self):

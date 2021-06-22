@@ -94,7 +94,8 @@ class TalkRoomNode(DjangoObjectType):
     class Meta:
         model = TalkRoom
         filter_fields = {
-            'join_users': ['exact', 'icontains']
+            # 'join_users': ['exact', 'icontains'],
+            'selected_plan': ['exact'],
         }
         interfaces = (relay.Node,)
 
@@ -104,7 +105,7 @@ class MessageNode(DjangoObjectType):
         model = Message
         filter_fields = {
             'text': ['exact', 'icontains'],
-            'talking_room__join_users': ['exact', 'icontains'],
+            # 'talking_room__join_users': ['exact', 'icontains'],
         }
         interfaces = (relay.Node,)
 
@@ -349,8 +350,9 @@ class DeletePlanMutation(relay.ClientIDMutation):
 class CreateTalkRoomMutation(relay.ClientIDMutation):
     class Input:
         talk_room_description = graphene.String(required=False)
-        join_users = graphene.List(graphene.ID)
+        # join_users = graphene.List(graphene.ID)
         selected_plan = graphene.ID(required=True)
+        opponent_user = graphene.ID(required=True)
 
     talk_room = graphene.Field(TalkRoomNode)
 
@@ -358,21 +360,24 @@ class CreateTalkRoomMutation(relay.ClientIDMutation):
     def mutate_and_get_payload(root, info, **input):
         talk_room = TalkRoom(
             talk_room_description=input.get('talk_room_description'),
-            selected_plan=input.get('selected_plan'),
+            selected_plan=Plan.objects.get(
+                from_global_id(input.get('selected_plan'))[1]),
+            opponent_user=User.objects.get(
+                from_global_id(input.get('opponent_user'))[1])
         )
         # ManyToMany時は↓で一旦saveが必要
         talk_room.save()
 
-        if input.get('join_users') is not None:
-            join_users_set = []
-            for join_user in input.get('join_users'):
-                join_user_id = from_global_id(join_user)[1]
-                join_user_object = User.objects.get(id=join_user_id)
-                join_users_set.append(join_user_object)
-                talk_room.join_users.set(join_users_set)
-            talk_room.save()
+        # if input.get('join_users') is not None:
+        #     join_users_set = []
+        #     for join_user in input.get('join_users'):
+        #         join_user_id = from_global_id(join_user)[1]
+        #         join_user_object = User.objects.get(id=join_user_id)
+        #         join_users_set.append(join_user_object)
+        #         talk_room.join_users.set(join_users_set)
+        #     talk_room.save()
 
-        talk_room.save()
+        # talk_room.save()
         return CreateTalkRoomMutation(talk_room=talk_room)
 
 

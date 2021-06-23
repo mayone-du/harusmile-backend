@@ -76,11 +76,13 @@ class Profile(models.Model):
         on_delete=models.CASCADE
     )
     telephone_number = models.CharField(
-        max_length=11, unique=True, blank=True, default='')
+        max_length=11, unique=False, blank=True, null=True, default='')
     profile_name = models.CharField(max_length=100, default='')
-    profile_text = models.CharField(max_length=1000, default='', blank=True)
+    profile_text = models.CharField(
+        max_length=1000, default='', blank=True, null=True)
     is_college_student = models.BooleanField(default=False)
-    school_name = models.CharField(max_length=100, default='')
+    school_name = models.CharField(
+        max_length=100, default='', blank=True, null=True)
     created_at = models.DateTimeField(auto_now=True)
     profile_image = models.ImageField(
         blank=True, null=True, upload_to=upload_avatar_path)
@@ -108,11 +110,11 @@ class Profile(models.Model):
         User, related_name='following_users',  blank=True, default=[])
     selected_address = models.ForeignKey(
         Address, related_name='selected_address',
-        on_delete=models.PROTECT, blank=True
+        on_delete=models.PROTECT, blank=True, null=True
     )
     selected_gender = models.ForeignKey(
         Gender, related_name='selected_gender',
-        on_delete=models.PROTECT, blank=True
+        on_delete=models.PROTECT, blank=True, null=True
     )
     tags = models.ManyToManyField(
         Tag, related_name='tags', blank=True, default=[])

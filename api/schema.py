@@ -145,8 +145,8 @@ class CreateUserMutation(relay.ClientIDMutation):
         )
         user.set_password(input.get('password'))
         user.save()
-        send_mail(subject='ハルスマイル | 新規登録完了のお知らせ', message='メッセージ作成時にメール送信しています\n' + input.get('email'), from_email="harusmile@email.com",
-                  recipient_list=[input.get('email')], fail_silently=False)
+        # send_mail(subject='ハルスマイル | 新規登録完了のお知らせ', message='メッセージ作成時にメール送信しています\n' + input.get('email'), from_email="harusmile@email.com",
+        #           recipient_list=[input.get('email')], fail_silently=False)
 
         return CreateUserMutation(user=user)
 
@@ -156,11 +156,11 @@ class CreateProfileMutation(relay.ClientIDMutation):
         profile_name = graphene.String(required=True)
         profile_text = graphene.String(required=False)
         is_college_student = graphene.Boolean(required=True)
-        school_name = graphene.String(required=True)
+        school_name = graphene.String(required=False)
         age = graphene.Int(required=False)
-        selected_gender = graphene.ID(required=True)
-        selected_address = graphene.ID(required=True)
-        telephone_number = graphene.String(required=True)
+        selected_gender = graphene.ID(required=False)
+        selected_address = graphene.ID(required=False)
+        telephone_number = graphene.String(required=False)
         want_hear = graphene.String(required=False)
         problem = graphene.String(required=False)
         undergraduate = graphene.String(required=False)
@@ -189,14 +189,9 @@ class CreateProfileMutation(relay.ClientIDMutation):
             telephone_number=input.get('telephone_number'),
             want_hear=input.get('want_hear'),
             problem=input.get('problem'),
-            selected_gender=Gender.objects.get(
-                id=from_global_id(input.get('selected_gender'))[1]),
-            selected_address=Address.objects.get(
-                id=from_global_id(input.get('selected_address'))[1]),
             profile_image=input.get('profile_image'),
         )
         profile.save()
-
         return CreateProfileMutation(profile=profile)
 
 

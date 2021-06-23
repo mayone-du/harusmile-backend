@@ -5,6 +5,7 @@ import graphql_jwt
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
+from django.db.models import Q
 from django.db.models.fields import related
 from django.utils import tree
 from graphene import relay
@@ -360,10 +361,9 @@ class CreateTalkRoomMutation(relay.ClientIDMutation):
     def mutate_and_get_payload(root, info, **input):
         talk_room = TalkRoom(
             talk_room_description=input.get('talk_room_description'),
-            selected_plan=Plan.objects.get(
-                from_global_id(input.get('selected_plan'))[1]),
-            opponent_user=User.objects.get(
-                from_global_id(input.get('opponent_user'))[1])
+            # ! ↓TalkRoomモデルのフィールドのそれぞれの外部キーに、各modelインスタンスのキーを設定する
+            selected_plan_id=from_global_id(input.get('selected_plan'))[1],
+            opponent_user_id=from_global_id(input.get('opponent_user'))[1],
         )
         # ManyToMany時は↓で一旦saveが必要
         talk_room.save()
@@ -508,6 +508,7 @@ class Query(graphene.ObjectType):
     all_addresses = DjangoFilterConnectionField(AddressNode)
     talk_room = graphene.Field(TalkRoomNode, id=graphene.NonNull(graphene.ID))
     all_talk_rooms = DjangoFilterConnectionField(TalkRoomNode)
+    login_user_talk_rooms = DjangoFilterConnectionField(TalkRoomNode)
     message = graphene.Field(MessageNode, id=graphene.NonNull(graphene.ID))
     all_messages = DjangoFilterConnectionField(MessageNode)
     login_user_messages = DjangoFilterConnectionField(MessageNode)
@@ -614,6 +615,10 @@ class Query(graphene.ObjectType):
     @login_required
     def resolve_all_talk_rooms(self, info, **kwargs):
         return TalkRoom.objects.all()
+
+    @login_required
+    def resolve_login_user_talk_rooms(self, info, **kwargs):
+        return TalkRoom.objects.filter(Q(selected_plan__plan_author=info.context.user.id) | Q(opponent_user=info.context.user.id))
 
     # @login_required
     def resolve_login_user_reviews(self, info, **kwargs):

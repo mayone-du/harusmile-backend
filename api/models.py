@@ -13,9 +13,9 @@ def upload_avatar_path(instance, filename):
     return '/'.join(['avatars', str(instance.target_user.id)+str(instance.profile_name)+str(".")+str(ext)])
 
 
-def upload_post_path(instance, filename):
+def upload_plan_path(instance, filename):
     ext = filename.split('.')[-1]
-    return '/'.join(['todos', str(instance.posted_user.id)+str(instance.title)+str(".")+str(ext)])
+    return '/'.join(['plans', str(instance.posted_user.id)+str(instance.title)+str(".")+str(ext)])
 
 
 class UserManager(BaseUserManager):

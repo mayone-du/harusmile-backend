@@ -15,7 +15,7 @@ def upload_avatar_path(instance, filename):
 
 def upload_plan_path(instance, filename):
     ext = filename.split('.')[-1]
-    return '/'.join(['plans', str(instance.posted_user.id)+str(instance.title)+str(".")+str(ext)])
+    return '/'.join(['plans', str(instance.plan_author.id)+str(instance.title)+str(".")+str(ext)])
 
 
 class UserManager(BaseUserManager):
@@ -129,7 +129,7 @@ class Plan(models.Model):
     title = models.CharField(max_length=100)
     content = models.CharField(max_length=1000)
     plan_image = models.ImageField(
-        blank=True, null=True, upload_to=upload_post_path)
+        blank=True, null=True, upload_to=upload_plan_path)
     is_published = models.BooleanField(default=False)
     published_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)

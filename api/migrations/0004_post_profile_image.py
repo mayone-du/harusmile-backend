@@ -14,6 +14,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='post',
             name='profile_image',
-            field=models.ImageField(blank=True, null=True, upload_to=api.models.upload_post_path),
+            field=models.ImageField(
+                blank=True, null=True, upload_to=api.models.upload_plan_path),
         ),
     ]

@@ -493,7 +493,7 @@ class Query(graphene.ObjectType):
     profile = graphene.Field(ProfileNode, id=graphene.NonNull(graphene.ID))
     all_profiles = DjangoFilterConnectionField(ProfileNode)
     high_school_profiles = DjangoFilterConnectionField(ProfileNode)
-    collage_profiles = DjangoFilterConnectionField(ProfileNode)
+    college_profiles = DjangoFilterConnectionField(ProfileNode)
     plan = graphene.Field(PlanNode, id=graphene.NonNull(graphene.ID))
     all_plans = DjangoFilterConnectionField(PlanNode)
     login_user_plans = DjangoFilterConnectionField(PlanNode)
@@ -546,9 +546,9 @@ class Query(graphene.ObjectType):
     # high_school_profiles
     def resolve_high_school_profiles(self, info, **kwargs):
         return Profile.objects.filter(is_college_student=False)
-    # collage_profiles
+    # college_profiles
 
-    def resolve_collage_profiles(self, info, **kwargs):
+    def resolve_college_profiles(self, info, **kwargs):
         return Profile.objects.filter(is_college_student=True)
 
     # plan

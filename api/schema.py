@@ -156,7 +156,7 @@ class CreateProfileMutation(relay.ClientIDMutation):
         profile_name = graphene.String(required=True)
         profile_text = graphene.String(required=False)
         is_college_student = graphene.Boolean(required=True)
-        school_name = graphene.String(required=False)
+        school_name = graphene.String(required=True)
         age = graphene.Int(required=False)
         selected_gender = graphene.ID(required=False)
         selected_address = graphene.ID(required=False)
@@ -199,22 +199,22 @@ class UpdateProfileMutation(relay.ClientIDMutation):
     class Input:
         id = graphene.ID(required=True)
         profile_name = graphene.String(required=True)
-        profile_text = graphene.String(required=True)
-        is_college_student = graphene.Boolean(required=True)
-        school_name = graphene.String(required=True)
-        age = graphene.Int(required=True)
+        profile_text = graphene.String(required=False)
+        is_college_student = graphene.Boolean(required=False)
+        school_name = graphene.String(required=False)
+        age = graphene.Int(required=False)
         selected_gender = graphene.ID(required=True)
         selected_address = graphene.ID(required=True)
-        telephone_number = graphene.String(required=True)
-        want_hear = graphene.String(required=True)
-        problem = graphene.String(required=True)
+        telephone_number = graphene.String(required=False)
+        want_hear = graphene.String(required=False)
+        problem = graphene.String(required=False)
         following_users = graphene.List(graphene.ID)
         tags = graphene.List(graphene.ID)
-        undergraduate = graphene.String(required=True)
-        department = graphene.String(required=True)
-        club_activities = graphene.String(required=True)
-        admission_format = graphene.String(required=True)
-        favorite_subject = graphene.String(required=True)
+        undergraduate = graphene.String(required=False)
+        department = graphene.String(required=False)
+        club_activities = graphene.String(required=False)
+        admission_format = graphene.String(required=False)
+        favorite_subject = graphene.String(required=False)
         profile_image = Upload(required=False)
 
     profile = graphene.Field(ProfileNode)
@@ -590,13 +590,13 @@ class Query(graphene.ObjectType):
         return Tag.objects.all()
 
     # review
-    # @login_required
+    # login_required
     def resolve_review(self, info, **kwargs):
         id = kwargs.get('id')
         if id is not None:
             return Review.objects.get(id=from_global_id(id)[1])
 
-    # @login_required
+    # login_required
     def resolve_all_reviews(self, info, **kwargs):
         return Review.objects.all()
 
@@ -615,7 +615,7 @@ class Query(graphene.ObjectType):
     def resolve_login_user_talk_rooms(self, info, **kwargs):
         return TalkRoom.objects.filter(Q(selected_plan__plan_author=info.context.user.id) | Q(opponent_user=info.context.user.id))
 
-    # @login_required
+    # login_required
     def resolve_login_user_reviews(self, info, **kwargs):
         return Review.objects.filter(provider=info.context.user.id)
 

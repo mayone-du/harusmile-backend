@@ -302,11 +302,11 @@ class CreatePlanMutation(relay.ClientIDMutation):
 class UpdatePlanMutation(relay.ClientIDMutation):
     class Input:
         id = graphene.ID(required=True)
-        title = graphene.String(required=False)
-        content = graphene.String(required=False)
+        title = graphene.String(required=True)
+        content = graphene.String(required=True)
         plan_image = Upload(required=False)
         price = graphene.Int(required=True)
-        is_published = graphene.Boolean(required=False)
+        is_published = graphene.Boolean(required=True)
 
     plan = graphene.Field(PlanNode)
 

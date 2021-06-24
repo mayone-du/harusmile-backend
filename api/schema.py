@@ -280,6 +280,7 @@ class CreatePlanMutation(relay.ClientIDMutation):
         content = graphene.String(required=True)
         plan_image = Upload(required=False)
         is_published = graphene.Boolean(required=True)
+        price = graphene.Int(required=True)
 
     plan = graphene.Field(PlanNode)
 
@@ -290,6 +291,7 @@ class CreatePlanMutation(relay.ClientIDMutation):
             title=input.get('title'),
             content=input.get('content'),
             plan_image=input.get('plan_image'),
+            price=input.get('price'),
             is_published=input.get('is_published'),
         )
         plan.save()
@@ -303,6 +305,7 @@ class UpdatePlanMutation(relay.ClientIDMutation):
         title = graphene.String(required=False)
         content = graphene.String(required=False)
         plan_image = Upload(required=False)
+        price = graphene.Int(required=True)
         is_published = graphene.Boolean(required=False)
 
     plan = graphene.Field(PlanNode)
@@ -313,6 +316,7 @@ class UpdatePlanMutation(relay.ClientIDMutation):
             id=from_global_id(input.get('id'))[1],
             title=input.get('title'),
             content=input.get('content'),
+            price=input.get('price'),
             is_published=input.get('is_published'),
         )
 

@@ -389,10 +389,12 @@ class UpdateTalkRoomMutation(relay.ClientIDMutation):
 
     @login_required
     def mutate_and_get_payload(root, info, **input):
-        talk_room = TalkRoom(
+        talk_room = TalkRoom.objects.get(
             id=from_global_id(input.get('talk_room_id'))[1],
-            is_approve=input.get('is_approve'),
         )
+        talk_room.is_approve = input.get('is_approve')
+        # talk_room.talk_room_description = TalkRoom.get(
+        #     id=from_global_id(input.get('talk_room_id'))[1]).description
         talk_room.save()
         return UpdateTalkRoomMutation(talk_room=talk_room)
 

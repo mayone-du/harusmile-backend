@@ -380,6 +380,23 @@ class CreateTalkRoomMutation(relay.ClientIDMutation):
         return CreateTalkRoomMutation(talk_room=talk_room)
 
 
+class UpdateTalkRoomMutation(relay.ClientIDMutation):
+    class Input:
+        talk_room_id = graphene.ID(reuquired=True)
+        is_approve = graphene.Boolean(required=True)
+
+    talk_room = graphene.Field(TalkRoomNode)
+
+    @login_required
+    def mutate_and_get_payload(root, info, **input):
+        talk_room = TalkRoom(
+            id=from_global_id(input.get('talk_room_id'))[1],
+            is_approve=input.get('is_approve'),
+        )
+        talk_room.save()
+        return UpdateTalkRoomMutation(talk_room=talk_room)
+
+
 # メッセージ作成
 class CreateMessageMutation(relay.ClientIDMutation):
     class Input:
@@ -473,6 +490,7 @@ class Mutation(graphene.ObjectType):
     delete_plan = DeletePlanMutation.Field()
 
     create_talk_room = CreateTalkRoomMutation().Field()
+    update_talk_room = UpdateTalkRoomMutation().Field()
     create_message = CreateMessageMutation.Field()
 
     create_review = CreateReviewMutation.Field()
@@ -501,6 +519,7 @@ class Query(graphene.ObjectType):
     review = graphene.Field(ReviewNode, id=graphene.NonNull(graphene.ID))
     all_reviews = DjangoFilterConnectionField(ReviewNode)
     login_user_reviews = DjangoFilterConnectionField(ReviewNode)
+    # login_user_written_reviews = DjangoFilterConnectionField(ReviewNode)
     gender = graphene.Field(GenderNode, id=graphene.NonNull(graphene.ID))
     all_genders = DjangoFilterConnectionField(GenderNode)
     address = graphene.Field(AddressNode, id=graphene.NonNull(graphene.ID))
@@ -622,6 +641,9 @@ class Query(graphene.ObjectType):
     # login_required
     def resolve_login_user_reviews(self, info, **kwargs):
         return Review.objects.filter(provider=info.context.user.id)
+
+    # def resolve_login_user_written_reviews(self, info, **kwargs):
+    #     return Review.objects.filter(customer=info.context.user.id)
 
     # message
     @login_required

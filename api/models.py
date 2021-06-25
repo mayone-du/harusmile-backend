@@ -194,6 +194,7 @@ class TalkRoom(models.Model):
         settings.AUTH_USER_MODEL, related_name='opponent_user',
         on_delete=models.CASCADE, blank=True, null=True
     )
+    is_approve = models.BooleanField(default=False)
 
     def __str__(self):
         return str(self.talk_room_description)

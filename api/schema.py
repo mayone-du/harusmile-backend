@@ -131,7 +131,7 @@ class NotificationNode(DjangoObjectType):
         }
         interfaces = (relay.Node,)
 
-
+# ユーザー作成
 class CreateUserMutation(relay.ClientIDMutation):
     class Input:
         email = graphene.String(required=True)
@@ -151,6 +151,7 @@ class CreateUserMutation(relay.ClientIDMutation):
         return CreateUserMutation(user=user)
 
 
+# プロフィールの作成
 class CreateProfileMutation(relay.ClientIDMutation):
     class Input:
         profile_name = graphene.String(required=True)
@@ -194,7 +195,7 @@ class CreateProfileMutation(relay.ClientIDMutation):
         profile.save()
         return CreateProfileMutation(profile=profile)
 
-
+# プロフィールの更新
 class UpdateProfileMutation(relay.ClientIDMutation):
     class Input:
         id = graphene.ID(required=True)
@@ -274,6 +275,7 @@ class UpdateProfileMutation(relay.ClientIDMutation):
         return UpdateProfileMutation(profile=profile)
 
 
+# プランの作成
 class CreatePlanMutation(relay.ClientIDMutation):
     class Input:
         title = graphene.String(required=True)

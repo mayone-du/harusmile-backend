@@ -145,8 +145,8 @@ class CreateUserMutation(relay.ClientIDMutation):
         )
         user.set_password(input.get('password'))
         user.save()
-        # send_mail(subject='ハルスマイル | 新規登録完了のお知らせ', message='メッセージ作成時にメール送信しています\n' + input.get('email'), from_email="harusmile@email.com",
-        #           recipient_list=[input.get('email')], fail_silently=False)
+        send_mail(subject='ハルスマイル | 新規登録完了のお知らせ', message='メッセージ作成時にメール送信しています\n' + input.get('email'), from_email="harusmile@email.com",
+                  recipient_list=[input.get('email')], fail_silently=False)
 
         return CreateUserMutation(user=user)
 

@@ -145,7 +145,8 @@ class CreateUserMutation(relay.ClientIDMutation):
         )
         user.set_password(input.get('password'))
         user.save()
-        send_mail(subject='ハルスマイル | 新規登録完了のお知らせ', message='メッセージ作成時にメール送信しています\n' + input.get('email'), from_email="harusmile@email.com",
+        # 作成されたメールアドレスに対してメールを送信
+        send_mail(subject='ハルスマイル | 新規登録完了のお知らせ', message='ユーザー作成時にメール送信しています\n' + input.get('email'), from_email="harusmile@email.com",
                   recipient_list=[input.get('email')], fail_silently=False)
 
         return CreateUserMutation(user=user)
@@ -300,7 +301,7 @@ class CreatePlanMutation(relay.ClientIDMutation):
 
         return CreatePlanMutation(plan=plan)
 
-
+# プランの更新
 class UpdatePlanMutation(relay.ClientIDMutation):
     class Input:
         id = graphene.ID(required=True)
@@ -332,7 +333,7 @@ class UpdatePlanMutation(relay.ClientIDMutation):
         plan.save()
         return UpdatePlanMutation(plan=plan)
 
-
+# プランの削除
 class DeletePlanMutation(relay.ClientIDMutation):
     class Input:
         id = graphene.ID(required=True)
@@ -381,7 +382,7 @@ class CreateTalkRoomMutation(relay.ClientIDMutation):
         # talk_room.save()
         return CreateTalkRoomMutation(talk_room=talk_room)
 
-
+# トークルームの更新
 class UpdateTalkRoomMutation(relay.ClientIDMutation):
     class Input:
         talk_room_id = graphene.ID(reuquired=True)
@@ -394,6 +395,7 @@ class UpdateTalkRoomMutation(relay.ClientIDMutation):
         talk_room = TalkRoom.objects.get(
             id=from_global_id(input.get('talk_room_id'))[1],
         )
+        # 承認フラグをTrueに更新
         talk_room.is_approve = input.get('is_approve')
         # talk_room.talk_room_description = TalkRoom.get(
         #     id=from_global_id(input.get('talk_room_id'))[1]).description
@@ -440,7 +442,7 @@ class CreateReviewMutation(relay.ClientIDMutation):
         review.save()
         return CreateReviewMutation(review=review)
 
-
+# 通知の作成
 class CreateNotificationMutation(relay.ClientIDMutation):
     class Input:
         receiver = graphene.ID(required=True)
@@ -460,8 +462,9 @@ class CreateNotificationMutation(relay.ClientIDMutation):
         notification.save()
         return CreateNotificationMutation(notification=notification)
 
-
+# 通知を更新
 class UpdateNotificationsMutation(relay.ClientIDMutation):
+    # リスト形式でIDを受け取る
     class Input:
         notification_ids = graphene.List(graphene.ID)
 
@@ -475,6 +478,7 @@ class UpdateNotificationsMutation(relay.ClientIDMutation):
                 notification = ''
                 notification_object = Notification.objects.get(
                     id=from_global_id(notification_id)[1])
+                # チェックしたかのフラグをTrueに更新
                 notification_object.is_checked = True
                 notification_object.notificator_id = notification_object.notificator_id
                 notification_object.receiver_id = notification_object.receiver_id

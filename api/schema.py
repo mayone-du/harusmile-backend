@@ -5,8 +5,10 @@ import graphql_jwt
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
+from django.core.signing import BadSignature, dumps, loads
 from django.db.models import Q
 from django.db.models.fields import related
+from django.http import HttpResponseBadRequest
 from django.utils import tree
 from graphene import relay
 from graphene_django import DjangoObjectType
@@ -145,11 +147,45 @@ class CreateUserMutation(relay.ClientIDMutation):
         )
         user.set_password(input.get('password'))
         user.save()
+        # userのpkをもとに暗号化
+        token = dumps(user.pk)
         # 作成されたメールアドレスに対してメールを送信
-        send_mail(subject='ハルスマイル | 新規登録完了のお知らせ', message='ユーザー作成時にメール送信しています\n' + input.get('email'), from_email="harusmile@email.com",
-                  recipient_list=[input.get('email')], fail_silently=False)
+        send_mail(subject='ハルスマイル | 本登録のご案内', message=f'ユーザー作成時にメール送信しています\n {token} \n', from_email="harusmile@email.com",
+                recipient_list=[input.get('email')], fail_silently=False)
 
         return CreateUserMutation(user=user)
+        
+
+
+# # ユーザーの更新
+class UpdateUserMutation(relay.ClientIDMutation):
+    class Input:
+        token = graphene.String(required=True)
+    
+    ok = graphene.Boolean()
+
+    def mutate_and_get_payload(root, info, token):
+        try:
+            # tokenからユーザーのpkを復号
+            user_pk = loads(token)
+            # ユーザーを取得
+            user = get_user_model().objects.get(pk=user_pk)
+        # tokenが間違っている場合
+        except BadSignature:
+            return HttpResponseBadRequest()
+        # ユーザーが存在しない場合
+        except User.DoesNotExist:
+            return HttpResponseBadRequest()
+        # ユーザーの本登録がまだであれば本登録のフラグをTrueに更新する
+        if not user.is_active:
+            user.is_active = True
+            user.save()
+            ok = True
+            return UpdateUserMutation(ok=ok)
+        # 既に本登録済みの場合
+        else:
+            return HttpResponseBadRequest()
+
 
 
 # プロフィールの作成
@@ -421,7 +457,7 @@ class CreateMessageMutation(relay.ClientIDMutation):
         message.save()
         return CreateMessageMutation(message=message)
 
-
+# レビューの作成
 class CreateReviewMutation(relay.ClientIDMutation):
     class Input:
         # target_post = graphene.ID(required=True)
@@ -490,6 +526,7 @@ class UpdateNotificationsMutation(relay.ClientIDMutation):
 
 class Mutation(graphene.ObjectType):
     create_user = CreateUserMutation.Field()
+    update_user = UpdateUserMutation.Field()
     create_profile = CreateProfileMutation.Field()
     update_profile = UpdateProfileMutation.Field()
 
@@ -506,6 +543,7 @@ class Mutation(graphene.ObjectType):
     create_notification = CreateNotificationMutation.Field()
     update_notifications = UpdateNotificationsMutation.Field()
 
+    # python manage.py cleartokens コマンドで無効なtokenを削除できる
     token_auth = graphql_jwt.ObtainJSONWebToken.Field()
     refresh_token = graphql_jwt.Refresh.Field()
     revoke_token = graphql_jwt.Revoke.Field()

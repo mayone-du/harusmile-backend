@@ -160,7 +160,7 @@ class CreateUserMutation(relay.ClientIDMutation):
         
 
 
-# # ユーザーの更新
+# ユーザーの更新（メールから本人確認）
 class UpdateUserMutation(relay.ClientIDMutation):
     class Input:
         token = graphene.String(required=True)
@@ -168,6 +168,7 @@ class UpdateUserMutation(relay.ClientIDMutation):
     ok = graphene.Boolean()
 
     def mutate_and_get_payload(root, info, token):
+        # TODO: 他の箇所もトランザクション化したり、↓がこのままで大丈夫か確認
         try:
             # tokenからユーザーのpkを復号
             user_pk = loads(token)
@@ -194,6 +195,8 @@ class UpdateUserMutation(relay.ClientIDMutation):
 # プロフィールの作成
 class CreateProfileMutation(relay.ClientIDMutation):
     class Input:
+        # ↓メールアドレスでの認証を挟むため引数で取得
+        target_user_id=graphene.ID(required=True)
         profile_name = graphene.String(required=True)
         profile_text = graphene.String(required=False)
         is_college_student = graphene.Boolean(required=True)
@@ -213,10 +216,11 @@ class CreateProfileMutation(relay.ClientIDMutation):
 
     profile = graphene.Field(ProfileNode)
 
-    @login_required
+    # @login_required
     def mutate_and_get_payload(root, info, **input):
         profile = Profile(
-            target_user_id=info.context.user.id,
+            # target_user_id=info.context.user.id,
+            target_user_id=from_global_id(input.get('target_user_id'))[1],
             profile_name=input.get('profile_name'),
             profile_text=input.get('profile_text'),
             is_college_student=input.get('is_college_student'),
@@ -585,18 +589,21 @@ class Query(graphene.ObjectType):
 
     # login_user
 
-    @login_required
+    # 自分のプロフィールを取得
+    # @login_required
     def resolve_login_user(self, info, **kwargs):
         return User.objects.get(id=info.context.user.id)
 
     # user
 
+    # ユーザーを取得
     @login_required
     def resolve_user(self, info, **kwargs):
         id = kwargs.get('id')
         if id is not None:
             return get_user_model().objects.get(id=from_global_id(id)[1])
 
+    # すべてのユーザーを取得
     @login_required
     def resolve_all_users(self, info, **kwargs):
         return get_user_model().objects.all()

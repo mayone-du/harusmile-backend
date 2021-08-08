@@ -150,10 +150,14 @@ class CreateUserMutation(relay.ClientIDMutation):
         )
         user.set_password(input.get('password'))
         user.save()
+        # TODO: メールアドレスとパスワードもクエリパラメーターで送り、そのままログイン出来るようにする
         # userのpkをもとに暗号化
         token = dumps(user.pk)
+        message = f'''ユーザー作成時にメール送信しています\n
+                http://localhost:3000/auth/verify?token={token}
+                    '''
         # 作成されたメールアドレスに対してメールを送信
-        send_mail(subject='ハルスマイル | 本登録のご案内', message=f'ユーザー作成時にメール送信しています\n {token} \n', from_email="harusmile@email.com",
+        send_mail(subject='ハルスマイル | 本登録のご案内', message=message, from_email="harusmile@email.com",
                 recipient_list=[input.get('email')], fail_silently=False)
 
         return CreateUserMutation(user=user)

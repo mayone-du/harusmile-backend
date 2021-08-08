@@ -61,6 +61,9 @@ class ProfileNode(DjangoObjectType):
     class Meta:
         model = Profile
         filter_fields = {
+            # 本人確認が済んでいるユーザーをフィルタリング
+            'target_user__is_active': ['exact'],
+
             'profile_name': ['exact', 'icontains'],
             'profile_text': ['exact', 'icontains'],
             'age': ['exact'],

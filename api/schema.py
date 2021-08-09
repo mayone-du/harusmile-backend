@@ -1,4 +1,4 @@
-from typing import Text
+from datetime import timedelta
 
 import graphene
 import graphql_jwt
@@ -7,9 +7,7 @@ from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.core.signing import BadSignature, dumps, loads
 from django.db.models import Q
-from django.db.models.fields import related
 from django.http import HttpResponseBadRequest
-from django.utils import tree
 from graphene import relay
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
@@ -150,14 +148,17 @@ class CreateUserMutation(relay.ClientIDMutation):
         )
         user.set_password(input.get('password'))
         user.save()
-        # TODO: メールアドレスとパスワードもクエリパラメーターで送り、そのままログイン出来るようにする
         # userのpkをもとに暗号化
         token = dumps(user.pk)
-        message = f'''ユーザー作成時にメール送信しています\n
-                http://localhost:3000/auth/verify?token={token}
+        exp = timedelta(minutes=30)
+        # TODO: クエリパラメーターでemailとpasswordをおくり、ログインの処理もさせる？
+        # http://localhost:3000/auth/verify?token={token}&email={input.get('email')}&password={input.get('password')}
+        html_message = f'''
+        <h1>ユーザー作成時にメール送信しています</h1>\n
+                <p><a href="http://localhost:3000/auth/verify?token={token}&exp={exp}">こちらのリンク</a>をクリックして本登録をしてください。</p>
                     '''
         # 作成されたメールアドレスに対してメールを送信
-        send_mail(subject='ハルスマイル | 本登録のご案内', message=message, from_email="harusmile@email.com",
+        send_mail(subject='ハルスマイル | 本登録のご案内', message="本登録のご案内です。", html_message=html_message, from_email="harusmile@email.com",
                 recipient_list=[input.get('email')], fail_silently=False)
 
         return CreateUserMutation(user=user)
@@ -172,7 +173,7 @@ class UpdateUserMutation(relay.ClientIDMutation):
     ok = graphene.Boolean()
 
     def mutate_and_get_payload(root, info, token):
-        # TODO: 他の箇所もトランザクション化したり、↓がこのままで大丈夫か確認
+        # TODO: 他の箇所もトランザクション化したり、↓がこのままで大丈夫か確認 エラーハンドリングを丁寧に設定
         try:
             # tokenからユーザーのpkを復号
             user_pk = loads(token)
@@ -180,10 +181,10 @@ class UpdateUserMutation(relay.ClientIDMutation):
             user = get_user_model().objects.get(pk=user_pk)
         # tokenが間違っている場合
         except BadSignature:
-            return HttpResponseBadRequest()
+            raise HttpResponseBadRequest()
         # ユーザーが存在しない場合
         except User.DoesNotExist:
-            return HttpResponseBadRequest()
+            raise HttpResponseBadRequest()
         # ユーザーの本登録がまだであれば本登録のフラグをTrueに更新する
         if not user.is_active:
             user.is_active = True
@@ -192,7 +193,7 @@ class UpdateUserMutation(relay.ClientIDMutation):
             return UpdateUserMutation(ok=ok)
         # 既に本登録済みの場合
         else:
-            return HttpResponseBadRequest()
+            raise HttpResponseBadRequest()
 
 
 

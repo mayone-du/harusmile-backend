@@ -150,6 +150,8 @@ class CreateUserMutation(relay.ClientIDMutation):
         user.save()
         # userのpkをもとに暗号化
         token = dumps(user.pk)
+        # メールの有効期限を設定
+        # TODO: フロント側で有効期限ないか確認 新規登録はしたが期限が切れた場合にメールを再送する設定も。
         exp = timedelta(minutes=30)
         # TODO: クエリパラメーターでemailとpasswordをおくり、ログインの処理もさせる？
         # http://localhost:3000/auth/verify?token={token}&email={input.get('email')}&password={input.get('password')}
@@ -577,6 +579,7 @@ class Query(graphene.ObjectType):
     review = graphene.Field(ReviewNode, id=graphene.NonNull(graphene.ID))
     all_reviews = DjangoFilterConnectionField(ReviewNode)
     login_user_reviews = DjangoFilterConnectionField(ReviewNode)
+    login_user_send_reviews = DjangoFilterConnectionField(ReviewNode)
     # login_user_written_reviews = DjangoFilterConnectionField(ReviewNode)
     gender = graphene.Field(GenderNode, id=graphene.NonNull(graphene.ID))
     all_genders = DjangoFilterConnectionField(GenderNode)
@@ -700,8 +703,13 @@ class Query(graphene.ObjectType):
         return TalkRoom.objects.filter(Q(selected_plan__plan_author=info.context.user.id) | Q(opponent_user=info.context.user.id))
 
     # login_required
+    # 自分が受け取ったレビュー
     def resolve_login_user_reviews(self, info, **kwargs):
         return Review.objects.filter(provider=info.context.user.id)
+
+    # 自分が送信したレビュー
+    def resolve_login_user_send_reviews(self, info, **kwargs):
+        return Review.objects.filter(customer=info.context.user.id)
 
     # def resolve_login_user_written_reviews(self, info, **kwargs):
     #     return Review.objects.filter(customer=info.context.user.id)

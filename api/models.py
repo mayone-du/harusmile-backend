@@ -9,7 +9,9 @@ from django.db import models
 
 # プロフィール用の画像のリネーム
 def upload_avatar_path(instance, filename):
+    # 拡張子を取得
     ext = filename.split('.')[-1]
+    # ファイル名を変更して保存
     return '/'.join(['avatars', str(instance.target_user.id)+str(instance.profile_name)+str(".")+str(ext)])
 
 
@@ -19,7 +21,7 @@ def upload_plan_path(instance, filename):
     return '/'.join(['plans', str(instance.plan_author.id)+str(instance.title)+str(".")+str(ext)])
 
 
-# ユーザーマネージャーを継承
+# Djangoのユーザーマネージャーを継承
 class UserManager(BaseUserManager):
     def create_user(self, email, password=None):
         if not email:
@@ -30,7 +32,7 @@ class UserManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
-# スーパーユーザーの作成
+    # スーパーユーザーの作成
     def create_superuser(self, email, password):
         user = self.create_user(email, password)
         user.is_staff = True

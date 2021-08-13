@@ -472,7 +472,7 @@ class CreateMessageMutation(relay.ClientIDMutation):
         return CreateMessageMutation(message=message)
 
 # メッセージをみたらメッセージを更新
-class UpdateMessageMutation(relay.ClientIDMutation):
+class UpdateMessagesMutation(relay.ClientIDMutation):
     class Input:
         # 未読のメッセージをIDのリスト形式でうけとる
         message_ids = graphene.List(graphene.ID)
@@ -487,7 +487,7 @@ class UpdateMessageMutation(relay.ClientIDMutation):
                 message.is_viewed=True
                 message.save()
             ok = True
-            return UpdateMessageMutation(ok=ok)
+            return UpdateMessagesMutation(ok=ok)
         except:
             raise
 
@@ -571,6 +571,7 @@ class Mutation(graphene.ObjectType):
     create_talk_room = CreateTalkRoomMutation().Field()
     update_talk_room = UpdateTalkRoomMutation().Field()
     create_message = CreateMessageMutation.Field()
+    update_messages = UpdateMessagesMutation.Field()
 
     create_review = CreateReviewMutation.Field()
 

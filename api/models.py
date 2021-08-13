@@ -250,6 +250,8 @@ class Message(models.Model):
     )
     # 内容
     text = models.CharField(max_length=1000)
+    is_viewed = models.BooleanField(default=False)
+    # 相手がメッセージを確認したかどうか
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

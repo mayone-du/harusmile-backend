@@ -471,6 +471,26 @@ class CreateMessageMutation(relay.ClientIDMutation):
         message.save()
         return CreateMessageMutation(message=message)
 
+# メッセージをみたらメッセージを更新
+class UpdateMessageMutation(relay.ClientIDMutation):
+    class Input:
+        # 未読のメッセージをIDのリスト形式でうけとる
+        message_ids = graphene.List(graphene.ID)
+
+    ok = graphene.Boolean()
+
+    @login_required
+    def mutate_and_get_payload(root, info, **input):
+        try:
+            for messege_id in input.get('message_ids'):
+                message: Message=Message.objects.get(id=from_global_id(messege_id)[1])
+                message.is_viewed=True
+                message.save()
+            ok = True
+            return UpdateMessageMutation(ok=ok)
+        except:
+            raise
+
 # レビューの作成
 class CreateReviewMutation(relay.ClientIDMutation):
     class Input:

@@ -365,14 +365,14 @@ class UpdatePlanMutation(relay.ClientIDMutation):
 
     @login_required
     def mutate_and_get_payload(root, info, **input):
-        plan = Plan(
-            id=from_global_id(input.get('id'))[1],
-            title=input.get('title'),
-            content=input.get('content'),
-            price=input.get('price'),
-            is_published=input.get('is_published'),
-        )
+        # idからプランを取得
+        plan = Plan.objects.get(id=from_global_id(input.get('id'))[1])
+        plan.title=input.get('title')
+        plan.content=input.get('content')
+        plan.price=input.get('price')
+        plan.is_published=input.get('is_published')
 
+        # 新しいプランの画像があればそれを設定し、なければもとのプランの画像のままにする
         if input.get('plan_image') is not None:
             plan.plan_image = input.get('plan_image')
         else:

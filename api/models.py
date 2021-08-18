@@ -164,7 +164,7 @@ class Plan(models.Model):
         return self.plan_author.email + ' のプラン名 ' + self.title
 
 
-# レビュー（ユーザーに対して　）
+# レビュー（ユーザーに対して）
 class Review(models.Model):
     # サービス提供者（大学生側）
     provider = models.ForeignKey(

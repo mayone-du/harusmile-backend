@@ -615,8 +615,12 @@ class Query(graphene.ObjectType):
     notification = graphene.Field(
         NotificationNode, id=graphene.NonNull(graphene.ID))
     login_user_notifications = DjangoFilterConnectionField(NotificationNode)
+    all_profiles_count = graphene.Int()
 
-    # login_user
+
+    # 全てのプロフィールの件数を取得
+    def resolve_all_profiles_count(self, info, **kwargs):
+        return Profile.objects.all().count()
 
     # 自分のプロフィールを取得
     # @login_required
